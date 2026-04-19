@@ -16,7 +16,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background-color: #07070f;
+  background-color: #080d18;
   color: #eeeef5;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -32,7 +32,7 @@ body {
   width: 5px;
 }
 ::-webkit-scrollbar-track {
-  background: #07070f;
+  background: #080d18;
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.08);

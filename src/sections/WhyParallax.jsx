@@ -8,7 +8,7 @@ const PILLARS = [
     title: 'Custom by default',
     description:
       'Every system Parallax builds is engineered from scratch for your business — not assembled from drag-and-drop builders or pre-made templates.',
-    color: '#3b82f6',
+    color: '#0f9b74',
   },
   {
     Icon: Cpu,
@@ -29,7 +29,7 @@ const PILLARS = [
     title: 'Engineered for growth',
     description:
       'Beyond a launch. Systems that evolve with your business, support new channels, and become a long-term competitive advantage.',
-    color: '#10b981',
+    color: '#34d399',
   },
 ]
 
@@ -38,7 +38,7 @@ export default function WhyParallax() {
   const headInView = useInView(headRef, { once: true })
 
   return (
-    <section className="py-28 px-6 bg-[#09091a]/50 border-y border-white/5">
+    <section className="py-28 px-6 bg-[#0a1020]/60 border-y border-white/5">
       <div className="max-w-7xl mx-auto">
         <motion.div
           ref={headRef}
@@ -47,7 +47,9 @@ export default function WhyParallax() {
           transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="text-center mb-16"
         >
-          <span className="text-xs font-semibold text-violet-400 tracking-[0.2em] uppercase">Why Parallax</span>
+          <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: '#0f9b74' }}>
+            Why Parallax
+          </span>
           <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-white tracking-tight">
             Beyond typical development.
           </h2>
@@ -67,7 +69,7 @@ export default function WhyParallax() {
                 initial={{ opacity: 0, y: 18 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.55, delay: i * 0.08, ease: [0.21, 0.47, 0.32, 0.98] }}
-                className="relative p-8 bg-[#0e0e1c] border border-white/6 rounded-2xl overflow-hidden group"
+                className="relative p-8 bg-[#0c1426] border border-white/6 rounded-2xl overflow-hidden"
               >
                 <div
                   className="absolute top-0 left-0 right-0 h-px"

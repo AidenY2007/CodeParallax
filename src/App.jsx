@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage'
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-[#07070f] text-[#eeeef5]">
+      <div className="min-h-screen bg-[#080d18] text-[#eeeef5]">
         <Navbar />
         <main>
           <Routes>

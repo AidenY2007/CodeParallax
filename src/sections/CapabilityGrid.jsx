@@ -3,7 +3,7 @@ import { motion, useInView } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import {
   Lock, CreditCard, Sparkles, GitBranch, Database,
-  Plug, Mail, MessageSquare, BarChart2, ArrowUpRight,
+  Plug, MessageSquare, BarChart2, Layout, ArrowUpRight,
 } from 'lucide-react'
 
 const CAPS = [
@@ -12,27 +12,27 @@ const CAPS = [
     title: 'Authentication',
     description: 'Secure identity, roles, and session management for real products.',
     href: '/features/authentication',
-    color: '#3b82f6',
-    glow: 'rgba(59,130,246,0.12)',
-    border: 'rgba(59,130,246,0.25)',
+    color: '#0f9b74',
+    glow: 'rgba(15,155,116,0.12)',
+    border: 'rgba(15,155,116,0.25)',
   },
   {
     Icon: CreditCard,
     title: 'Payments & Fintech',
     description: 'Billing, subscriptions, and payment infrastructure that supports revenue.',
     href: '/features/payments',
-    color: '#10b981',
-    glow: 'rgba(16,185,129,0.12)',
-    border: 'rgba(16,185,129,0.25)',
+    color: '#34d399',
+    glow: 'rgba(52,211,153,0.12)',
+    border: 'rgba(52,211,153,0.25)',
   },
   {
     Icon: Sparkles,
     title: 'AI Integration',
     description: 'AI-powered assistants, copilots, and intelligent workflows.',
     href: '/features/ai',
-    color: '#8b5cf6',
-    glow: 'rgba(139,92,246,0.12)',
-    border: 'rgba(139,92,246,0.25)',
+    color: '#a78bfa',
+    glow: 'rgba(167,139,250,0.12)',
+    border: 'rgba(167,139,250,0.25)',
   },
   {
     Icon: GitBranch,
@@ -48,9 +48,9 @@ const CAPS = [
     title: 'Databases & Dashboards',
     description: 'Operational systems with visibility, structure, and control.',
     href: '/features/databases-dashboards',
-    color: '#3b82f6',
-    glow: 'rgba(59,130,246,0.12)',
-    border: 'rgba(59,130,246,0.25)',
+    color: '#0f9b74',
+    glow: 'rgba(15,155,116,0.12)',
+    border: 'rgba(15,155,116,0.25)',
   },
   {
     Icon: Plug,
@@ -62,22 +62,22 @@ const CAPS = [
     border: 'rgba(139,92,246,0.25)',
   },
   {
-    Icon: Mail,
-    title: 'Email Systems',
-    description: 'Lifecycle email for onboarding, nurture, and conversion.',
-    href: '/features/email',
+    Icon: MessageSquare,
+    title: 'Communication',
+    description: 'Email and SMS systems for lifecycle messaging, alerts, and conversion.',
+    href: '/features/communication',
     color: '#06b6d4',
     glow: 'rgba(6,182,212,0.12)',
     border: 'rgba(6,182,212,0.25)',
   },
   {
-    Icon: MessageSquare,
-    title: 'SMS Systems',
-    description: 'Programmatic SMS for engagement, alerts, and automation.',
-    href: '/features/sms',
-    color: '#10b981',
-    glow: 'rgba(16,185,129,0.12)',
-    border: 'rgba(16,185,129,0.25)',
+    Icon: Layout,
+    title: 'UI / Design',
+    description: 'Custom interfaces and design systems built to your brand at every touchpoint.',
+    href: '/features/ui-design',
+    color: '#8b5cf6',
+    glow: 'rgba(139,92,246,0.12)',
+    border: 'rgba(139,92,246,0.25)',
   },
   {
     Icon: BarChart2,
@@ -103,8 +103,7 @@ function CapCard({ cap, index }) {
     >
       <Link
         to={cap.href}
-        className="group relative flex flex-col h-full p-6 bg-[#0e0e1c] border border-white/6 rounded-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
-        style={{ '--cap-color': cap.color, '--cap-glow': cap.glow, '--cap-border': cap.border }}
+        className="group relative flex flex-col h-full p-6 bg-[#0c1426] border border-white/6 rounded-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
       >
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none"
@@ -144,7 +143,9 @@ export default function CapabilityGrid() {
           transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="text-center mb-16"
         >
-          <span className="text-xs font-semibold text-blue-400 tracking-[0.2em] uppercase">Capabilities</span>
+          <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: '#0f9b74' }}>
+            Capabilities
+          </span>
           <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-white tracking-tight">
             Nine systems. One platform.
           </h2>

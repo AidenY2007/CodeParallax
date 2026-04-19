@@ -1,11 +1,11 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Layout } from 'lucide-react'
 
 function AuthVisual() {
   return (
-    <div className="bg-[#0b0b18] border border-white/8 rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-auto">
+    <div className="bg-[#0c1426] border border-white/8 rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-auto">
       <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
         <span className="text-xs text-slate-500 font-mono">auth.parallax.io</span>
         <span className="flex items-center gap-1.5 text-xs text-emerald-400">
@@ -22,7 +22,8 @@ function AuthVisual() {
             ••••••••••••
           </div>
         </div>
-        <div className="bg-blue-600 rounded-lg px-4 py-2.5 text-sm text-white font-semibold text-center">
+        <div className="rounded-lg px-4 py-2.5 text-sm text-white font-semibold text-center"
+          style={{ background: 'linear-gradient(135deg, #0f9b74, #06b6d4, #8b5cf6)' }}>
           Continue →
         </div>
         <div className="border-t border-white/5 pt-3">
@@ -33,9 +34,9 @@ function AuthVisual() {
                 key={role}
                 className="px-2.5 py-1 rounded-lg text-xs font-mono"
                 style={{
-                  background: ['rgba(59,130,246,0.15)', 'rgba(139,92,246,0.15)', 'rgba(100,116,139,0.15)'][i],
-                  color: ['#60a5fa', '#a78bfa', '#64748b'][i],
-                  border: `1px solid ${['rgba(59,130,246,0.25)', 'rgba(139,92,246,0.25)', 'rgba(100,116,139,0.25)'][i]}`,
+                  background: ['rgba(15,155,116,0.15)', 'rgba(139,92,246,0.15)', 'rgba(100,116,139,0.15)'][i],
+                  color: ['#0f9b74', '#a78bfa', '#64748b'][i],
+                  border: `1px solid ${['rgba(15,155,116,0.25)', 'rgba(139,92,246,0.25)', 'rgba(100,116,139,0.25)'][i]}`,
                 }}
               >
                 {role}
@@ -56,14 +57,14 @@ function PaymentsVisual() {
   ]
   return (
     <div className="space-y-3 w-full max-w-sm mx-auto">
-      <div className="bg-[#0b0b18] border border-white/8 rounded-xl p-4 flex items-center justify-between">
+      <div className="bg-[#0c1426] border border-white/8 rounded-xl p-4 flex items-center justify-between">
         <span className="text-xs text-slate-500">Total billed</span>
         <span className="text-lg font-bold text-white font-mono">$7,800</span>
       </div>
       {invoices.map((inv) => (
         <div
           key={inv.num}
-          className="flex items-center justify-between px-4 py-3.5 bg-[#0b0b18] border border-white/6 rounded-xl"
+          className="flex items-center justify-between px-4 py-3.5 bg-[#0c1426] border border-white/6 rounded-xl"
         >
           <div>
             <div className="text-sm font-semibold text-white font-mono">{inv.num}</div>
@@ -86,7 +87,7 @@ function PaymentsVisual() {
 
 function AIVisual() {
   return (
-    <div className="bg-[#0b0b18] border border-white/8 rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-auto">
+    <div className="bg-[#0c1426] border border-white/8 rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-auto">
       <div className="px-5 py-4 border-b border-white/5 flex items-center gap-2">
         <div className="w-2 h-2 rounded-full bg-violet-500 animate-pulse" />
         <span className="text-xs text-slate-400 font-semibold">Parallax AI Assistant</span>
@@ -94,7 +95,7 @@ function AIVisual() {
       </div>
       <div className="p-4 space-y-3">
         <div className="flex justify-end">
-          <div className="bg-blue-600/20 border border-blue-500/20 rounded-xl rounded-tr-sm px-3.5 py-2.5 text-xs text-blue-200 max-w-[80%]">
+          <div className="rounded-xl rounded-tr-sm px-3.5 py-2.5 text-xs max-w-[80%]" style={{ background: 'rgba(15,155,116,0.15)', border: '1px solid rgba(15,155,116,0.2)', color: '#6ee7b7' }}>
             Summarize Q3 performance data
           </div>
         </div>
@@ -130,13 +131,13 @@ function AIVisual() {
 
 function AutomationVisual() {
   const nodes = [
-    { label: 'New sign-up', color: '#3b82f6', x: 0 },
+    { label: 'New sign-up', color: '#0f9b74', x: 0 },
     { label: 'Send email', color: '#8b5cf6', x: 1 },
     { label: 'Wait 2 days', color: '#06b6d4', x: 2 },
     { label: 'Qualify lead', color: '#10b981', x: 3 },
   ]
   return (
-    <div className="bg-[#0b0b18] border border-white/8 rounded-2xl p-5 w-full max-w-sm mx-auto">
+    <div className="bg-[#0c1426] border border-white/8 rounded-2xl p-5 w-full max-w-sm mx-auto">
       <p className="text-xs text-slate-600 mb-4 font-mono">Onboarding workflow</p>
       <div className="space-y-2">
         {nodes.map((node, i) => (
@@ -179,19 +180,19 @@ function DatabaseVisual() {
     <div className="space-y-3 w-full max-w-sm mx-auto">
       <div className="grid grid-cols-2 gap-3">
         {[
-          { label: 'Active users', value: '2,847', delta: '+12%', color: '#3b82f6' },
+          { label: 'Active users', value: '2,847', delta: '+12%', color: '#0f9b74' },
           { label: 'Revenue MRR', value: '$18.4K', delta: '+8%', color: '#10b981' },
           { label: 'Requests/min', value: '1,204', delta: '+3%', color: '#8b5cf6' },
           { label: 'Uptime', value: '99.99%', delta: '30 days', color: '#06b6d4' },
         ].map((kpi) => (
-          <div key={kpi.label} className="bg-[#0b0b18] border border-white/6 rounded-xl p-3.5">
+          <div key={kpi.label} className="bg-[#0c1426] border border-white/6 rounded-xl p-3.5">
             <div className="text-[11px] text-slate-600 mb-1">{kpi.label}</div>
             <div className="text-base font-bold text-white">{kpi.value}</div>
             <div className="text-[11px] mt-0.5" style={{ color: kpi.color }}>{kpi.delta}</div>
           </div>
         ))}
       </div>
-      <div className="bg-[#0b0b18] border border-white/6 rounded-xl p-3.5">
+      <div className="bg-[#0c1426] border border-white/6 rounded-xl p-3.5">
         <div className="flex items-end justify-between h-12 gap-1.5">
           {[40, 65, 45, 80, 55, 90, 70, 85, 60, 95].map((h, i) => (
             <div
@@ -199,7 +200,7 @@ function DatabaseVisual() {
               className="flex-1 rounded-sm"
               style={{
                 height: `${h}%`,
-                background: `linear-gradient(to top, #3b82f6, #8b5cf6)`,
+                background: `linear-gradient(to top, #0f9b74, #8b5cf6)`,
                 opacity: 0.6 + i * 0.04,
               }}
             />
@@ -215,7 +216,7 @@ function DatabaseVisual() {
 
 function APIVisual() {
   return (
-    <div className="bg-[#0b0b18] border border-white/8 rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-auto">
+    <div className="bg-[#0c1426] border border-white/8 rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-auto">
       <div className="px-5 py-3.5 border-b border-white/5 flex items-center gap-2">
         <span className="text-xs px-2 py-0.5 rounded font-mono font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20">
           POST
@@ -224,9 +225,9 @@ function APIVisual() {
       </div>
       <div className="p-4 font-mono text-xs space-y-0.5">
         <div className="text-slate-600">{'{'}</div>
-        <div className="pl-4"><span className="text-blue-400">"event"</span><span className="text-slate-500">:</span> <span className="text-emerald-400">"payment.success"</span><span className="text-slate-500">,</span></div>
-        <div className="pl-4"><span className="text-blue-400">"amount"</span><span className="text-slate-500">:</span> <span className="text-violet-400">2400</span><span className="text-slate-500">,</span></div>
-        <div className="pl-4"><span className="text-blue-400">"currency"</span><span className="text-slate-500">:</span> <span className="text-emerald-400">"usd"</span></div>
+        <div className="pl-4"><span className="text-teal-400">"event"</span><span className="text-slate-500">:</span> <span className="text-emerald-400">"payment.success"</span><span className="text-slate-500">,</span></div>
+        <div className="pl-4"><span className="text-teal-400">"amount"</span><span className="text-slate-500">:</span> <span className="text-violet-400">2400</span><span className="text-slate-500">,</span></div>
+        <div className="pl-4"><span className="text-teal-400">"currency"</span><span className="text-slate-500">:</span> <span className="text-emerald-400">"usd"</span></div>
         <div className="text-slate-600">{'}'}</div>
       </div>
       <div className="px-4 pb-4 pt-1 border-t border-white/5">
@@ -235,7 +236,7 @@ function APIVisual() {
           <span className="text-xs text-slate-500">Response · 42ms</span>
         </div>
         <div className="text-xs text-slate-500 font-mono">
-          <span className="text-blue-400">"status"</span>: <span className="text-emerald-400">"processed"</span>
+          <span className="text-teal-400">"status"</span>: <span className="text-emerald-400">"processed"</span>
         </div>
       </div>
       <div className="px-4 pb-4 flex gap-2 flex-wrap">
@@ -249,77 +250,136 @@ function APIVisual() {
   )
 }
 
-function EmailVisual() {
+function CommunicationVisual() {
   const sequence = [
-    { step: 1, name: 'Welcome email', status: 'sent', delay: 'Immediately', color: '#10b981' },
-    { step: 2, name: 'Feature highlight', status: 'sent', delay: 'Day 3', color: '#10b981' },
-    { step: 3, name: 'Case study', status: 'pending', delay: 'Day 7', color: '#f59e0b' },
-    { step: 4, name: 'Offer', status: 'draft', delay: 'Day 14', color: '#64748b' },
+    { step: 1, name: 'Welcome email',     status: 'sent',    delay: 'Immediately', color: '#10b981' },
+    { step: 2, name: 'Feature highlight', status: 'sent',    delay: 'Day 3',       color: '#10b981' },
+    { step: 3, name: 'Case study',        status: 'pending', delay: 'Day 7',       color: '#f59e0b' },
+    { step: 4, name: 'Offer',             status: 'draft',   delay: 'Day 14',      color: '#64748b' },
   ]
   return (
-    <div className="bg-[#0b0b18] border border-white/8 rounded-2xl p-5 w-full max-w-sm mx-auto">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-xs text-slate-400 font-semibold">Onboarding sequence</p>
-        <span className="text-xs text-blue-400 font-mono">4 emails</span>
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mx-auto">
+      {/* Email sequence */}
+      <div className="bg-[#0c1426] border border-white/8 rounded-2xl p-5">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs text-slate-400 font-semibold">Onboarding sequence</p>
+          <span className="text-xs text-[#06b6d4] font-mono">4 emails</span>
+        </div>
+        <div className="space-y-2">
+          {sequence.map((email) => (
+            <div key={email.step} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/3 border border-white/5">
+              <div
+                className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
+                style={{ background: `${email.color}20`, color: email.color }}
+              >
+                {email.step}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-slate-300 truncate">{email.name}</div>
+                <div className="text-[10px] text-slate-600">{email.delay}</div>
+              </div>
+              <span
+                className="text-[10px] px-2 py-0.5 rounded-full flex-shrink-0"
+                style={{ color: email.color, background: `${email.color}18` }}
+              >
+                {email.status}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 pt-3 border-t border-white/5 flex justify-between text-xs text-slate-600">
+          <span>847 enrolled</span>
+          <span className="text-[#0f9b74]">42% open rate</span>
+        </div>
       </div>
-      <div className="space-y-2">
-        {sequence.map((email) => (
-          <div key={email.step} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/3 border border-white/5">
-            <div
-              className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0"
-              style={{ background: `${email.color}20`, color: email.color }}
-            >
-              {email.step}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs text-slate-300 truncate">{email.name}</div>
-              <div className="text-[10px] text-slate-600">{email.delay}</div>
-            </div>
-            <span
-              className="text-[10px] px-2 py-0.5 rounded-full flex-shrink-0"
-              style={{ color: email.color, background: `${email.color}18` }}
-            >
-              {email.status}
-            </span>
+      {/* SMS */}
+      <div className="bg-[#0c1426] border border-white/8 rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-7 h-7 rounded-full bg-[#0f9b74]/20 border border-[#0f9b74]/30 flex items-center justify-center">
+            <span className="text-[10px] text-[#0f9b74] font-bold">P</span>
           </div>
-        ))}
-      </div>
-      <div className="mt-3 pt-3 border-t border-white/5 flex justify-between text-xs text-slate-600">
-        <span>847 enrolled</span>
-        <span className="text-emerald-400">42% open rate</span>
+          <div>
+            <div className="text-xs text-white font-semibold">Parallax SMS</div>
+            <div className="text-[10px] text-slate-600">Notifications</div>
+          </div>
+        </div>
+        <div className="space-y-2.5">
+          {[
+            { text: 'Invoice #1094 is ready. Pay here: pay.parallax.io/1094', time: '9:41 AM', out: false },
+            { text: 'Payment confirmed. $2,400 received. Thanks!',           time: '2:15 PM', out: false },
+            { text: 'New project milestone reached. View update →',          time: '4:30 PM', out: true  },
+          ].map((msg, i) => (
+            <div
+              key={i}
+              className={`px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed max-w-[90%] ${
+                msg.out
+                  ? 'ml-auto rounded-br-sm'
+                  : 'rounded-bl-sm'
+              }`}
+              style={msg.out
+                ? { background: 'rgba(15,155,116,0.15)', border: '1px solid rgba(15,155,116,0.20)', color: '#6ee7b7' }
+                : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.06)', color: '#94a3b8' }
+              }
+            >
+              {msg.text}
+              <div className="text-[10px] text-slate-600 mt-1">{msg.time}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 pt-3 border-t border-white/5 text-xs text-[#06b6d4]">
+          98% delivery rate
+        </div>
       </div>
     </div>
   )
 }
 
-function SMSVisual() {
+function UIVisual() {
   return (
-    <div className="bg-[#0b0b18] border border-white/8 rounded-2xl p-5 w-full max-w-xs mx-auto">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-7 h-7 rounded-full bg-emerald-600/30 border border-emerald-500/30 flex items-center justify-center">
-          <span className="text-[10px] text-emerald-400 font-bold">P</span>
+    <div className="w-full max-w-sm mx-auto space-y-3">
+      <div className="bg-[#0c1426] border border-white/8 rounded-2xl p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-slate-400 font-semibold">Component Library</p>
+          <span className="text-xs text-[#8b5cf6] font-mono">v2.4.0</span>
         </div>
-        <div>
-          <div className="text-xs text-white font-semibold">Parallax</div>
-          <div className="text-[10px] text-slate-600">SMS Notifications</div>
+        {/* Buttons */}
+        <div className="flex gap-2">
+          <div className="flex-1 h-9 rounded-xl text-xs font-bold text-white flex items-center justify-center"
+            style={{ background: 'linear-gradient(135deg, #0f9b74, #06b6d4, #8b5cf6)' }}>
+            Primary
+          </div>
+          <div className="flex-1 h-9 rounded-xl text-xs font-semibold text-slate-300 flex items-center justify-center bg-white/5 border border-white/10">
+            Secondary
+          </div>
+          <div className="flex-1 h-9 rounded-xl text-xs font-semibold flex items-center justify-center border"
+            style={{ color: '#8b5cf6', borderColor: 'rgba(139,92,246,0.35)', background: 'rgba(139,92,246,0.08)' }}>
+            Ghost
+          </div>
+        </div>
+        {/* Input */}
+        <div className="h-9 bg-white/4 border border-white/8 rounded-xl px-3 flex items-center gap-2">
+          <span className="text-xs text-slate-500">Search components...</span>
+          <div className="ml-auto w-px h-4 bg-[#0f9b74] animate-blink" />
+        </div>
+        {/* Color palette */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500 mr-1">Palette</span>
+          {['#0f9b74','#06b6d4','#8b5cf6','#34d399','#a78bfa'].map(c => (
+            <div key={c} className="w-6 h-6 rounded-lg border border-white/10 shadow-lg"
+              style={{ background: c }} />
+          ))}
         </div>
       </div>
-      <div className="space-y-2.5">
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-2">
         {[
-          { text: 'Your invoice #1094 is ready. Pay here: pay.parallax.io/1094', time: '9:41 AM' },
-          { text: 'Payment confirmed. $2,400 received. Thanks!', time: '2:15 PM' },
-          { text: 'New project milestone reached. View update →', time: '4:30 PM' },
-        ].map((msg, i) => (
-          <div
-            key={i}
-            className={`px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed max-w-[90%] ${
-              i === 2
-                ? 'ml-auto bg-blue-600/30 border border-blue-500/20 text-blue-200 rounded-br-sm'
-                : 'bg-white/5 border border-white/6 text-slate-300 rounded-bl-sm'
-            }`}
-          >
-            {msg.text}
-            <div className="text-[10px] text-slate-600 mt-1">{msg.time}</div>
+          { label: 'Components', value: '48+',    color: '#8b5cf6' },
+          { label: 'Screens',    value: '120+',   color: '#06b6d4' },
+          { label: 'Tokens',     value: '200+',   color: '#0f9b74' },
+        ].map(s => (
+          <div key={s.label} className="bg-[#0c1426] border border-white/6 rounded-xl p-3 text-center">
+            <div className="text-xs font-bold text-white">{s.value}</div>
+            <div className="text-[10px] text-slate-600 mt-0.5">{s.label}</div>
           </div>
         ))}
       </div>
@@ -347,31 +407,31 @@ function AnalyticsVisual() {
     <div className="space-y-3 w-full max-w-sm mx-auto">
       <div className="grid grid-cols-3 gap-2">
         {[
-          { label: 'Visitors', value: '12.4K', delta: '+18%', color: '#3b82f6' },
+          { label: 'Visitors', value: '12.4K', delta: '+18%', color: '#0f9b74' },
           { label: 'Conversion', value: '3.8%', delta: '+0.4%', color: '#10b981' },
           { label: 'Bounce', value: '34%', delta: '-5%', color: '#8b5cf6' },
         ].map((stat) => (
-          <div key={stat.label} className="bg-[#0b0b18] border border-white/6 rounded-xl p-3">
+          <div key={stat.label} className="bg-[#0c1426] border border-white/6 rounded-xl p-3">
             <div className="text-[10px] text-slate-600 mb-1">{stat.label}</div>
             <div className="text-sm font-bold text-white">{stat.value}</div>
             <div className="text-[10px] mt-0.5" style={{ color: stat.color }}>{stat.delta}</div>
           </div>
         ))}
       </div>
-      <div className="bg-[#0b0b18] border border-white/6 rounded-xl p-4">
+      <div className="bg-[#0c1426] border border-white/6 rounded-xl p-4">
         <div className="flex justify-between mb-3">
           <span className="text-xs text-slate-500">Traffic (30 days)</span>
-          <span className="text-xs text-blue-400 font-mono">+18%</span>
+          <span className="text-xs text-teal-400 font-mono">+18%</span>
         </div>
         <svg width="100%" viewBox={`0 0 ${svgW} ${svgH}`} preserveAspectRatio="none" className="h-16">
           <defs>
             <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#3b82f6" stopOpacity="0" />
+              <stop offset="0%" stopColor="#0f9b74" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#0f9b74" stopOpacity="0" />
             </linearGradient>
           </defs>
           <path d={areaD} fill="url(#areaGrad)" />
-          <path d={pathD} fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d={pathD} fill="none" stroke="#0f9b74" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
     </div>
@@ -386,7 +446,7 @@ const FEATURES = [
     description:
       'Identity, access control, and session management — engineered to production standards with role-based permissions, multi-factor authentication, and social login.',
     href: '/features/authentication',
-    color: '#3b82f6',
+    color: '#0f9b74',
     Visual: AuthVisual,
   },
   {
@@ -426,7 +486,7 @@ const FEATURES = [
     description:
       'Scalable databases with admin panels, KPI dashboards, and real-time data feeds — giving your team the clarity they need to operate at speed.',
     href: '/features/databases-dashboards',
-    color: '#3b82f6',
+    color: '#0f9b74',
     Visual: DatabaseVisual,
   },
   {
@@ -440,24 +500,24 @@ const FEATURES = [
     Visual: APIVisual,
   },
   {
-    id: 'email',
-    tag: 'Email Systems',
-    headline: 'Lifecycle email systems for onboarding, communication, and conversion.',
+    id: 'communication',
+    tag: 'Communication',
+    headline: 'Email and SMS systems built for the full customer lifecycle.',
     description:
-      'Transactional emails, drip sequences, event-triggered campaigns, and delivery monitoring — built on Resend or SendGrid with template management.',
-    href: '/features/email',
+      'Transactional emails, drip sequences, SMS alerts, and two-way messaging — all integrated with your business logic and built on Resend, SendGrid, and Twilio.',
+    href: '/features/communication',
     color: '#06b6d4',
-    Visual: EmailVisual,
+    Visual: CommunicationVisual,
   },
   {
-    id: 'sms',
-    tag: 'SMS Systems',
-    headline: 'Programmatic SMS for engagement, alerts, and automation.',
+    id: 'ui',
+    tag: 'UI / Design',
+    headline: 'Custom interfaces that make your product impossible to forget.',
     description:
-      'Twilio-powered SMS for notifications, confirmations, marketing flows, and two-way conversations — integrated with your existing business logic.',
-    href: '/features/sms',
-    color: '#10b981',
-    Visual: SMSVisual,
+      'Pixel-perfect design systems, component libraries, and user interfaces built to reflect your brand — from landing pages to complex dashboards.',
+    href: '/features/ui-design',
+    color: '#8b5cf6',
+    Visual: UIVisual,
   },
   {
     id: 'analytics',
