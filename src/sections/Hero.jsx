@@ -1,6 +1,8 @@
 import { useRef, useEffect, useState } from 'react'
-import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
+import { motion, useScroll, useTransform } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
+import googleLogo from '../assets/google.svg.png'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
@@ -375,32 +377,21 @@ function DatabaseWidget() {
   )
 }
 
-// ─── Position groups by screen third (xl ≥ 1280 px) ─────────────────────────
-// Slot 0 → LEFT THIRD  (widget fits within 0–427 px)
-// Slot 1 → MIDDLE THIRD (widget fits within 427–853 px, all below caption)
-// Slot 2 → RIGHT THIRD  (widget fits within 853–1280 px)
-// 4 spots per third → 4³ = 64 possible layouts. Varied tops so nothing aligns.
-const POS_LEFT = [
-  { left: '40px', top: '16%' },   // edge, upper
-  { left: '40px', top: '57%' },   // edge, lower
-  { left: '9%',   top: '33%' },   // inset, mid-upper
-  { left: '9%',   top: '71%' },   // inset, lower
+// ─── Static widget layout (xl ≥ 1280 px) ────────────────────────────────────
+// All widgets stay visible at once. Side columns carry 8 widgets and the lower
+// center band carries 2 widgets, keeping the hero copy area clear.
+const STATIC_WIDGET_LAYOUTS = [
+  { left: '44px', top: '18%', scale: 0.72 },
+  { left: '86px', top: '37%', scale: 0.71 },
+  { left: '58px', top: '56%', scale: 0.73 },
+  { left: '102px', top: '74%', scale: 0.7 },
+  { right: '52px', top: '19%', scale: 0.72 },
+  { right: '96px', top: '40%', scale: 0.71 },
+  { right: '64px', top: '59%', scale: 0.73 },
+  { right: '108px', top: '76%', scale: 0.7 },
+  { left: 'calc(50% - 262px)', top: '64%', scale: 0.75 },
+  { left: 'calc(50% + 26px)', top: '73%', scale: 0.74 },
 ]
-const POS_MIDDLE = [
-  { left: 'calc(50% - 120px)', top: '55%' },  // centered, upper-lower
-  { left: 'calc(50% - 120px)', top: '72%' },  // centered, very low
-  { left: '34%',               top: '62%' },  // left-of-center
-  { left: '44%',               top: '68%' },  // right-of-center
-]
-const POS_RIGHT = [
-  { right: '40px', top: '22%' },  // edge, upper (offset from left)
-  { right: '40px', top: '62%' },  // edge, lower
-  { right: '9%',   top: '40%' },  // inset, mid
-  { right: '9%',   top: '74%' },  // inset, lower
-]
-const POSITIONS = [...POS_LEFT, ...POS_MIDDLE, ...POS_RIGHT]
-// Index map: LEFT=[0–3]  MIDDLE=[4–7]  RIGHT=[8–11]
-const GROUP_RANGES = [[0,1,2,3], [4,5,6,7], [8,9,10,11]]
 
 const FLOATS = [
   { x:[0,6,-3,0], y:[0,-5,3,0], r:[0,-0.3,0.2,0], dur:9   },
@@ -411,26 +402,9 @@ const FLOATS = [
 ]
 
 const WIDGETS = [
-  AuthWidget, PaymentsWidget, AIWidget, AutomationWidget, AnalyticsWidget,
-  UIWidget, EmailWidget, APIWidget, SMSWidget, DatabaseWidget,
+  AuthWidget, PaymentsWidget, AIWidget, AnalyticsWidget,
+  EmailWidget, APIWidget, SMSWidget, DatabaseWidget,
 ]
-
-function shuffleArr(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
-
-// Build the initial 3 entries — one position from each group
-function initActive() {
-  return GROUP_RANGES.map((group, slotIdx) => {
-    const posIdx = group[Math.floor(Math.random() * group.length)]
-    return { uid: slotIdx, Component: WIDGETS[slotIdx], posIdx }
-  })
-}
 
 // ─── Ambient background ───────────────────────────────────────────────────────
 function AmbientBg() {
@@ -472,6 +446,7 @@ export default function Hero() {
   const [wordIndex, setWordIndex] = useState(0)
   const [typedWord, setTypedWord] = useState('')
   const [deleting, setDeleting]   = useState(false)
+  const [loginOpen, setLoginOpen] = useState(false)
 
   useEffect(() => {
     const target = WORDS[wordIndex]
@@ -488,29 +463,18 @@ export default function Hero() {
     return () => clearTimeout(id)
   }, [typedWord, wordIndex, deleting])
 
-  // Exactly 3 widgets visible; one is replaced every 3333 ms → each lives ~10 s
-  const [active, setActive] = useState(initActive)
-  const uidRef    = useRef(3)   // next unique key (starts after initial 3)
-  const wIdxRef   = useRef(3)   // next widget index
-  const slotRef   = useRef(0)   // which of the 3 slots to swap next
-
   useEffect(() => {
-    const id = setInterval(() => {
-      const slot = slotRef.current % 3
-      slotRef.current++
-      setActive(prev => {
-        const group     = GROUP_RANGES[slot]
-        const curPosIdx = prev[slot].posIdx
-        // pick a different position within this slot's group
-        const choices   = group.filter(p => p !== curPosIdx)
-        const newPos    = choices[Math.floor(Math.random() * choices.length)]
-        const next      = [...prev]
-        next[slot]      = { uid: uidRef.current++, Component: WIDGETS[wIdxRef.current++ % WIDGETS.length], posIdx: newPos }
-        return next
-      })
-    }, 3333)
-    return () => clearInterval(id)
-  }, [])
+    if (!loginOpen) return undefined
+
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setLoginOpen(false)
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [loginOpen])
 
   return (
     <div ref={containerRef} style={{ height: '220vh' }}>
@@ -524,31 +488,40 @@ export default function Hero() {
         {/* Scroll veil */}
         <motion.div className="absolute inset-0 bg-[#080d18] pointer-events-none z-20" style={{ opacity: veilOpacity }} />
 
-        {/* Exactly 3 widgets, xl+ only so edge columns clear the caption */}
+        {/* Permanent widget layout on desktop widths */}
         <div className="absolute inset-0 z-10 hidden xl:block pointer-events-none">
-          <AnimatePresence>
-            {active.map(({ uid, Component, posIdx }) => {
-              const float = FLOATS[uid % FLOATS.length]
-              return (
+          {WIDGETS.map((Component, index) => {
+            const float = FLOATS[index % FLOATS.length]
+            const layout = STATIC_WIDGET_LAYOUTS[index]
+
+            return (
+              <div
+                key={index}
+                className="absolute"
+                style={{
+                  left: layout.left,
+                  right: layout.right,
+                  top: layout.top,
+                  transform: `scale(${layout.scale})`,
+                  transformOrigin: layout.right ? 'top right' : 'top left',
+                }}
+              >
                 <motion.div
-                  key={uid}
-                  className="absolute"
-                  style={POSITIONS[posIdx]}
-                  initial={{ opacity: 0, scale: 0.88, filter: 'blur(10px)' }}
-                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', x: float.x, y: float.y, rotate: float.r }}
-                  exit={{ opacity: 0, scale: 0.88, filter: 'blur(10px)' }}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1, x: float.x, y: float.y, rotate: float.r }}
                   transition={{
-                    opacity: TX_DUR, scale: TX_DUR, filter: TX_DUR,
-                    x:      { duration: float.dur,       repeat: Infinity, ease: 'easeInOut' },
-                    y:      { duration: float.dur + 0.5, repeat: Infinity, ease: 'easeInOut' },
-                    rotate: { duration: float.dur + 1,   repeat: Infinity, ease: 'easeInOut' },
+                    opacity: TX_DUR,
+                    scale: TX_DUR,
+                    x: { duration: float.dur, repeat: Infinity, ease: 'easeInOut' },
+                    y: { duration: float.dur + 0.5, repeat: Infinity, ease: 'easeInOut' },
+                    rotate: { duration: float.dur + 1, repeat: Infinity, ease: 'easeInOut' },
                   }}
                 >
                   <Component />
                 </motion.div>
-              )
-            })}
-          </AnimatePresence>
+              </div>
+            )
+          })}
         </div>
 
         {/* Hero text */}
@@ -575,13 +548,16 @@ export default function Hero() {
                 <span className="block mt-1 h-[1.18em]">
                   <span
                     className="italic bg-clip-text text-transparent"
-                    style={{ backgroundImage: 'linear-gradient(135deg, #34ffc2 0%, #38d9f5 55%, #c4abff 100%)' }}
+                    style={{
+                      backgroundImage: 'linear-gradient(135deg, #7cf6d8 0%, #38e0c8 24%, #32d6ff 52%, #5ea8ff 76%, #9b74ff 100%)',
+                    }}
                   >
                     {typedWord}
                   </span>
                   <motion.span
                     aria-hidden
-                    className="inline-block align-baseline w-[0.07em] h-[0.85em] rounded-sm bg-cyan-300 ml-0.5"
+                    className="inline-block align-baseline w-[0.07em] h-[0.85em] rounded-sm ml-0.5"
+                    style={{ background: AURORA }}
                     animate={{ opacity: [1, 0, 1] }}
                     transition={{ duration: 0.85, repeat: Infinity, ease: 'easeInOut' }}
                   />
@@ -589,9 +565,26 @@ export default function Hero() {
               </h1>
             </motion.div>
 
+            <motion.div variants={entrance.item} className="flex items-center justify-center gap-2">
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
+                style={{ background: AURORA, boxShadow: '0 8px 24px rgba(15,155,116,0.22)' }}
+              >
+                Contact
+              </Link>
+              <button
+                type="button"
+                onClick={() => setLoginOpen(true)}
+                className="inline-flex items-center justify-center rounded-xl border border-white/12 bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white"
+              >
+                Log in
+              </button>
+            </motion.div>
+
             <motion.div variants={entrance.item}>
               <p
-                className="text-center text-[0.95rem] text-slate-300 leading-relaxed max-w-md"
+                className="text-center text-[1.1rem] font-semibold text-slate-300 leading-relaxed max-w-xl"
                 style={{ textShadow: '0 1px 16px rgba(8,13,24,1)' }}
               >
                 Crafting next-generation software tailored to the unique operations of our clients.
@@ -610,6 +603,89 @@ export default function Hero() {
             <ChevronDown className="w-4 h-4 text-slate-600" />
           </motion.div>
         </motion.div>
+
+        {loginOpen && (
+          <div
+            className="absolute inset-0 z-50 flex items-center justify-center px-6"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="hero-login-title"
+            onClick={() => setLoginOpen(false)}
+          >
+            <div className="absolute inset-0 bg-[#050912]/80 backdrop-blur-sm" />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.98, y: 8 }}
+              transition={{ duration: 0.22, ease: [0.21, 0.47, 0.32, 0.98] }}
+              onClick={(event) => event.stopPropagation()}
+              className="relative w-full max-w-md rounded-[28px] border border-white/10 bg-[#0b1120]/96 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
+            >
+              <button
+                type="button"
+                aria-label="Close login dialog"
+                onClick={() => setLoginOpen(false)}
+                className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white"
+              >
+                ×
+              </button>
+
+              <div className="mb-6">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Client Access</p>
+                <h2 id="hero-login-title" className="text-2xl font-bold text-white">
+                  Log in to Parallax
+                </h2>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  Enter your credentials or continue with Google.
+                </p>
+              </div>
+
+              <form className="space-y-4" onSubmit={(event) => event.preventDefault()}>
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-200">Email</span>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="you@company.com"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-2 block text-sm font-medium text-slate-200">Password</span>
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                  />
+                </label>
+
+                <button
+                  type="submit"
+                  className="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
+                  style={{ background: AURORA, boxShadow: '0 10px 28px rgba(15,155,116,0.2)' }}
+                >
+                  Log in
+                </button>
+              </form>
+
+              <div className="my-4 flex items-center gap-3">
+                <div className="h-px flex-1 bg-white/8" />
+                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">or</span>
+                <div className="h-px flex-1 bg-white/8" />
+              </div>
+
+              <button
+                type="button"
+                className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-white/[0.07]"
+              >
+                <img src={googleLogo} alt="" className="h-5 w-5 object-contain" />
+                Sign in with Google
+              </button>
+            </motion.div>
+          </div>
+        )}
 
       </div>
     </div>
