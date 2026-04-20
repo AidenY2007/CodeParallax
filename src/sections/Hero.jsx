@@ -1,731 +1,613 @@
-import { useRef, useState, useEffect, useCallback } from 'react'
-import {
-  motion, AnimatePresence,
-  useScroll, useTransform,
-  useMotionValue, useSpring,
-} from 'framer-motion'
-import { Link } from 'react-router-dom'
-import {
-  ArrowRight, ChevronDown,
-  Lock, CreditCard, Sparkles, GitBranch,
-  BarChart2, Plug, MessageSquare, Database, Layout,
-} from 'lucide-react'
+import { useRef, useEffect, useState } from 'react'
+import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion'
+import { ChevronDown } from 'lucide-react'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
-// ─── Feature graphics ─────────────────────────────────────────────────────────
+const WORDS = ['automation', 'artificial intelligence', 'security', 'analytics', 'interface design', 'data infrastructure']
 
-function AuthGraphic() {
+// ─── Unique enter/exit transitions per widget ────────────────────────────────
+const TX = {
+  fromLeft:   { initial: { opacity: 0, x: -36, scale: 0.94 }, exit: { opacity: 0, x: 28, scale: 0.96 } },
+  fromRight:  { initial: { opacity: 0, x: 36, scale: 0.94 },  exit: { opacity: 0, x: -28, scale: 0.96 } },
+  fromTop:    { initial: { opacity: 0, y: -32, scale: 0.94 }, exit: { opacity: 0, y: 24, scale: 0.96 } },
+  fromBottom: { initial: { opacity: 0, y: 32, scale: 0.94 },  exit: { opacity: 0, y: -24, scale: 0.96 } },
+  blurScale:  { initial: { opacity: 0, scale: 0.85, filter: 'blur(10px)' }, exit: { opacity: 0, scale: 1.08, filter: 'blur(8px)' } },
+  rotatePop:  { initial: { opacity: 0, scale: 0.82, rotate: -5 }, exit: { opacity: 0, scale: 0.88, rotate: 4 } },
+  diag:       { initial: { opacity: 0, x: -22, y: -22, rotate: -3 }, exit: { opacity: 0, x: 18, y: 18, rotate: 2 } },
+}
+const ANIMATE_REST = { opacity: 1, x: 0, y: 0, scale: 1, rotate: 0, filter: 'blur(0px)' }
+const TX_DUR = { duration: 0.34, ease: [0.21, 0.47, 0.32, 0.98] }
+
+// ─── Widget wrapper ───────────────────────────────────────────────────────────
+function WCard({ label, dot, children }) {
   return (
-    <div className="flex items-center justify-center h-full p-6 min-h-[260px]">
-      <div className="w-full max-w-[210px] space-y-2.5">
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl p-5">
-          <div className="text-center mb-4">
-            <div className="w-8 h-8 rounded-xl bg-[#0f9b74]/15 flex items-center justify-center mx-auto mb-2">
-              <Lock className="w-4 h-4 text-[#0f9b74]" />
-            </div>
-            <div className="text-[11px] font-bold text-white">Welcome back</div>
-            <div className="text-[9px] text-slate-600 mt-0.5">Sign in to your account</div>
-          </div>
-          <div className="space-y-2 mb-3">
-            <div className="h-7 bg-white/4 border border-white/8 rounded-lg px-2.5 flex items-center">
-              <span className="text-[9px] text-slate-500">email@company.com</span>
-            </div>
-            <div className="h-7 bg-white/4 border border-white/8 rounded-lg px-2.5 flex items-center justify-between">
-              <span className="text-[9px] text-slate-600">••••••••</span>
-              <span className="text-[8px] text-[#0f9b74]">Show</span>
-            </div>
-          </div>
-          <div className="h-7 rounded-lg flex items-center justify-center text-[9px] font-bold text-white"
-            style={{ background: AURORA }}>
-            Sign In
-          </div>
-          <div className="flex gap-1.5 mt-2.5">
-            <div className="flex-1 h-6 bg-white/4 border border-white/6 rounded-lg flex items-center justify-center text-[8px] text-slate-500">Google</div>
-            <div className="flex-1 h-6 bg-white/4 border border-white/6 rounded-lg flex items-center justify-center text-[8px] text-slate-500">GitHub</div>
-          </div>
-        </div>
-        <div className="flex items-center justify-between bg-[#0f9b74]/8 border border-[#0f9b74]/20 rounded-xl px-3 py-2">
-          <div className="flex items-center gap-1.5">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#0f9b74] animate-pulse" />
-            <span className="text-[9px] text-[#0f9b74] font-mono">2,847 active sessions</span>
-          </div>
-          <span className="text-[9px] text-[#34d399] font-mono">MFA on</span>
+    <div
+      className="rounded-2xl overflow-hidden select-none pointer-events-none"
+      style={{
+        background: 'rgba(10,15,30,0.85)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        backdropFilter: 'blur(20px)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.04) inset',
+        width: 240,
+      }}
+    >
+      <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-white/[0.06]">
+        <span className="text-[9px] font-semibold tracking-[0.18em] uppercase text-slate-400">{label}</span>
+        <div className="flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: dot }} />
         </div>
       </div>
+      {children}
     </div>
   )
 }
 
-function PaymentsGraphic() {
+// ─── 10 Detailed Widgets ──────────────────────────────────────────────────────
+
+function AuthWidget() {
+  const users = [
+    { email: 'sarah@oakivy.co',    provider: 'Google', ago: '2m',  active: true },
+    { email: 'marcus@graze.co',    provider: 'Email',  ago: '18m', active: true },
+    { email: 'priya@vero.io',      provider: 'GitHub', ago: '1h',  active: false },
+  ]
   return (
-    <div className="flex items-center justify-center h-full p-6 min-h-[260px]">
-      <div className="w-full max-w-[230px] space-y-2.5">
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] text-slate-500 uppercase tracking-wider">Monthly Revenue</span>
-            <span className="text-[8px] px-1.5 py-0.5 bg-[#34d399]/10 text-[#34d399] rounded-full border border-[#34d399]/20">↑ 12%</span>
-          </div>
-          <div className="text-2xl font-extrabold text-white mb-3">$18,400</div>
-          <svg viewBox="0 0 180 40" className="w-full h-8">
-            <defs>
-              <linearGradient id="payGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#0f9b74" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="#0f9b74" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <path d="M0,38 L22,30 L45,33 L70,22 L95,26 L120,14 L145,9 L168,3 L180,1"
-              fill="none" stroke="#0f9b74" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M0,38 L22,30 L45,33 L70,22 L95,26 L120,14 L145,9 L168,3 L180,1 L180,40 L0,40 Z"
-              fill="url(#payGrad)" />
-          </svg>
-        </div>
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl p-3 space-y-2">
-          {[
-            { name: 'Pro Plan',   amount: '+$299',   color: '#34d399' },
-            { name: 'Enterprise', amount: '+$1,200', color: '#34d399' },
-            { name: 'Refund',     amount: '-$99',    color: '#f87171' },
-          ].map(t => (
-            <div key={t.name} className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-lg bg-white/4 border border-white/6" />
-                <span className="text-[9px] text-slate-400">{t.name}</span>
-              </div>
-              <span className="text-[9px] font-mono font-bold" style={{ color: t.color }}>{t.amount}</span>
+    <WCard label="Authentication" dot="#0f9b74">
+      <div>
+        {users.map(u => (
+          <div key={u.email} className="flex items-center gap-2.5 px-3.5 py-2 border-b border-white/[0.04] last:border-0">
+            <div className="w-6 h-6 rounded-full bg-[#0f9b74]/15 flex items-center justify-center flex-shrink-0">
+              <span className="text-[8px] font-bold text-[#0f9b74]">{u.email[0].toUpperCase()}</span>
             </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[9px] text-slate-200 truncate">{u.email}</div>
+              <div className="text-[7.5px] text-slate-600">{u.provider} · {u.ago} ago</div>
+            </div>
+            <div className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: u.active ? '#0f9b74' : '#374151' }} />
+          </div>
+        ))}
+        <div className="px-3.5 py-2 flex gap-1.5">
+          {['admin', 'editor', 'viewer', 'MFA'].map(r => (
+            <span key={r} className="text-[7px] px-1.5 py-0.5 rounded bg-white/5 border border-white/8 text-slate-500">{r}</span>
           ))}
         </div>
       </div>
-    </div>
+    </WCard>
   )
 }
 
-function AIGraphic() {
+function UIWidget() {
   return (
-    <div className="flex items-center justify-center h-full p-6 min-h-[260px]">
-      <div className="w-full max-w-[230px]">
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl overflow-hidden">
-          <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/6">
-            <div className="flex items-center gap-1.5">
-              <div className="w-5 h-5 rounded-lg bg-[#a78bfa]/15 flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-[#a78bfa]" />
-              </div>
-              <span className="text-[9px] font-semibold text-white">AI Assistant</span>
+    <WCard label="UI System" dot="#8b5cf6">
+      <div className="px-3.5 py-3 space-y-2.5">
+        <div className="flex gap-2">
+          <div className="flex-1 h-7 rounded-lg flex items-center justify-center text-[8px] font-bold text-white"
+            style={{ background: AURORA }}>Primary</div>
+          <div className="flex-1 h-7 rounded-lg flex items-center justify-center text-[8px] font-semibold text-slate-400 bg-white/5 border border-white/10">Ghost</div>
+        </div>
+        <div className="h-7 bg-white/4 border border-white/8 rounded-lg px-2.5 flex items-center gap-1.5">
+          <span className="text-[8px] text-slate-600">Search components…</span>
+          <div className="ml-auto w-px h-3 bg-[#8b5cf6] animate-blink" />
+        </div>
+        <div className="flex gap-1.5">
+          {['#0f9b74','#06b6d4','#8b5cf6','#34d399','#0c1426'].map(c => (
+            <div key={c} className="w-5 h-5 rounded-md border border-white/10" style={{ background: c }} />
+          ))}
+          <span className="text-[7px] text-slate-600 self-center ml-1">+195</span>
+        </div>
+        <div className="text-[7.5px] text-slate-600 font-mono">48 components · 200+ tokens</div>
+      </div>
+    </WCard>
+  )
+}
+
+function EmailWidget() {
+  const rows = [
+    { name: 'Welcome series',  sent: '847',  open: '42%', color: '#0f9b74' },
+    { name: 'Feature update',  sent: '1.2K', open: '38%', color: '#06b6d4' },
+    { name: 'Re-engagement',   sent: '320',  open: '22%', color: '#8b5cf6' },
+  ]
+  return (
+    <WCard label="Email System" dot="#06b6d4">
+      <div>
+        {rows.map(r => (
+          <div key={r.name} className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-white/[0.04] last:border-0">
+            <div className="flex-1 min-w-0">
+              <div className="text-[9px] text-slate-200 truncate">{r.name}</div>
+              <div className="text-[7.5px] text-slate-600">{r.sent} sent</div>
             </div>
-            <span className="text-[8px] px-1.5 py-0.5 bg-[#a78bfa]/10 text-[#a78bfa] rounded-full border border-[#a78bfa]/20">GPT-4 Turbo</span>
+            <span className="text-[8px] font-mono font-semibold" style={{ color: r.color }}>{r.open} open</span>
           </div>
-          <div className="p-3 space-y-2.5">
-            <div className="flex justify-end">
-              <div className="bg-[#0f9b74]/12 border border-[#0f9b74]/20 rounded-xl rounded-tr-sm px-2.5 py-1.5 max-w-[75%]">
-                <span className="text-[9px] text-slate-300">Summarize Q3 performance</span>
-              </div>
+        ))}
+        <div className="px-3.5 py-2 flex items-center justify-between">
+          <span className="text-[7.5px] text-slate-600">via Resend</span>
+          <span className="text-[7.5px] text-[#0f9b74] font-mono">↑ 6% this week</span>
+        </div>
+      </div>
+    </WCard>
+  )
+}
+
+function PaymentsWidget() {
+  const txns = [
+    { label: 'Acme Corp — Pro',  amount: '+$299',   color: '#34d399', ago: 'just now' },
+    { label: 'BuildCo — Ent.',   amount: '+$1,200', color: '#34d399', ago: '4m' },
+    { label: 'Refund issued',    amount: '−$99',    color: '#f87171', ago: '12m' },
+  ]
+  return (
+    <WCard label="Payments" dot="#34d399">
+      <div className="px-3.5 pt-3 pb-1">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[9px] text-slate-500">MRR</span>
+          <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#34d399]/10 text-[#34d399] border border-[#34d399]/20">↑ 12%</span>
+        </div>
+        <div className="text-xl font-extrabold text-white mb-2">$18,400</div>
+        <svg viewBox="0 0 200 32" className="w-full h-6 mb-2">
+          <defs>
+            <linearGradient id="mrr" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#34d399" stopOpacity="0.3"/>
+              <stop offset="100%" stopColor="#34d399" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,30 L25,24 L50,26 L75,18 L100,20 L125,12 L150,7 L175,3 L200,1"
+            fill="none" stroke="#34d399" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M0,30 L25,24 L50,26 L75,18 L100,20 L125,12 L150,7 L175,3 L200,1 L200,32 L0,32 Z"
+            fill="url(#mrr)"/>
+        </svg>
+      </div>
+      <div className="border-t border-white/[0.05]">
+        {txns.map(t => (
+          <div key={t.label} className="flex items-center gap-2 px-3.5 py-1.5 border-b border-white/[0.04] last:border-0">
+            <div className="flex-1 min-w-0">
+              <div className="text-[8.5px] text-slate-300 truncate">{t.label}</div>
+              <div className="text-[7px] text-slate-600">{t.ago} ago</div>
             </div>
-            <div className="flex gap-2">
-              <div className="w-5 h-5 rounded-full bg-[#a78bfa]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <Sparkles className="w-2.5 h-2.5 text-[#a78bfa]" />
-              </div>
-              <div className="bg-white/4 border border-white/8 rounded-xl rounded-tl-sm px-2.5 py-1.5">
-                <span className="text-[9px] text-slate-300 leading-relaxed">Revenue grew 18% to $18.4K MRR. Signups up 32%. Churn below 2%.</span>
-              </div>
+            <span className="text-[8.5px] font-mono font-bold" style={{ color: t.color }}>{t.amount}</span>
+          </div>
+        ))}
+      </div>
+    </WCard>
+  )
+}
+
+function APIWidget() {
+  const endpoints = [
+    { method: 'POST', path: '/api/checkout',  ms: 42,  status: 200 },
+    { method: 'GET',  path: '/api/users',     ms: 18,  status: 200 },
+    { method: 'POST', path: '/api/webhook',   ms: 28,  status: 200 },
+    { method: 'GET',  path: '/api/analytics', ms: 61,  status: 200 },
+  ]
+  const methodColor = { GET: '#34d399', POST: '#06b6d4', PUT: '#fbbf24', DELETE: '#f87171' }
+  return (
+    <WCard label="API Gateway" dot="#06b6d4">
+      <div>
+        {endpoints.map(e => (
+          <div key={e.path} className="flex items-center gap-2 px-3.5 py-1.5 border-b border-white/[0.04] last:border-0">
+            <span className="text-[7.5px] font-bold font-mono w-8 flex-shrink-0" style={{ color: methodColor[e.method] }}>{e.method}</span>
+            <span className="text-[8px] text-slate-400 flex-1 truncate font-mono">{e.path}</span>
+            <span className="text-[7.5px] font-mono text-slate-600 flex-shrink-0">{e.ms}ms</span>
+            <span className="text-[7px] font-bold text-[#34d399] w-7 text-right flex-shrink-0">{e.status}</span>
+          </div>
+        ))}
+        <div className="px-3.5 py-2 flex gap-1.5 flex-wrap">
+          {['Stripe','Twilio','OpenAI','Firebase'].map(s => (
+            <span key={s} className="text-[7px] px-1.5 py-0.5 rounded bg-white/5 border border-white/8 text-slate-500">{s}</span>
+          ))}
+        </div>
+      </div>
+    </WCard>
+  )
+}
+
+function AnalyticsWidget() {
+  return (
+    <WCard label="Analytics" dot="#fb923c">
+      <div className="px-3.5 py-2.5">
+        <div className="grid grid-cols-3 gap-1.5 mb-2.5">
+          {[
+            { label: 'Visitors',  value: '12.4K', delta: '+18%', c: '#0f9b74' },
+            { label: 'Conv.',     value: '3.8%',  delta: '+0.4%', c: '#06b6d4' },
+            { label: 'Bounce',    value: '32%',   delta: '−4%',  c: '#a78bfa' },
+          ].map(k => (
+            <div key={k.label} className="bg-white/4 border border-white/6 rounded-lg p-1.5 text-center">
+              <div className="text-[8px] text-slate-500">{k.label}</div>
+              <div className="text-[10px] font-bold text-white">{k.value}</div>
+              <div className="text-[7px] font-semibold" style={{ color: k.c }}>{k.delta}</div>
             </div>
-            <div className="flex gap-2">
-              <div className="w-5 h-5 rounded-full bg-[#a78bfa]/15 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-2.5 h-2.5 text-[#a78bfa]" />
-              </div>
-              <div className="bg-white/4 border border-white/8 rounded-xl px-3 py-2 flex gap-1">
-                {[0, 1, 2].map(i => (
-                  <motion.div key={i} className="w-1 h-1 rounded-full bg-slate-500"
-                    animate={{ opacity: [0.3, 1, 0.3] }}
-                    transition={{ duration: 1.2, delay: i * 0.2, repeat: Infinity }} />
-                ))}
-              </div>
-            </div>
+          ))}
+        </div>
+        <svg viewBox="0 0 200 48" className="w-full h-10">
+          <defs>
+            <linearGradient id="ang" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#0f9b74" stopOpacity="0.22"/>
+              <stop offset="100%" stopColor="#0f9b74" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M0,45 L18,38 L36,40 L54,32 L72,34 L90,26 L108,20 L126,14 L144,10 L162,5 L180,3 L200,1"
+            fill="none" stroke="#0f9b74" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M0,45 L18,38 L36,40 L54,32 L72,34 L90,26 L108,20 L126,14 L144,10 L162,5 L180,3 L200,1 L200,48 L0,48 Z"
+            fill="url(#ang)"/>
+          <path d="M0,45 L25,42 L50,40 L75,38 L100,35 L125,32 L150,29 L175,26 L200,23"
+            fill="none" stroke="#06b6d4" strokeWidth="1" strokeDasharray="3 2" opacity="0.4"/>
+        </svg>
+        <div className="flex justify-between mt-1">
+          <span className="text-[7px] text-slate-700">Oct</span>
+          <span className="text-[7px] text-slate-700">Nov</span>
+          <span className="text-[7px] text-slate-700">Dec</span>
+        </div>
+      </div>
+    </WCard>
+  )
+}
+
+function AIWidget() {
+  return (
+    <WCard label="AI Copilot" dot="#a78bfa">
+      <div className="px-3.5 py-3 space-y-2">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[7.5px] text-slate-600 font-mono">gpt-4-turbo</span>
+          <span className="text-[7px] px-1.5 py-0.5 rounded-full bg-[#a78bfa]/12 text-[#a78bfa] border border-[#a78bfa]/20">Active</span>
+        </div>
+        <div className="flex justify-end">
+          <div className="bg-[#0f9b74]/12 border border-[#0f9b74]/20 rounded-xl rounded-tr-sm px-2.5 py-1.5 max-w-[80%]">
+            <span className="text-[8.5px] text-slate-300">Summarize Q3 revenue</span>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <div className="w-5 h-5 rounded-full bg-[#a78bfa]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <span className="text-[7px] font-bold text-[#a78bfa]">AI</span>
+          </div>
+          <div className="bg-white/4 border border-white/8 rounded-xl rounded-tl-sm px-2.5 py-1.5">
+            <span className="text-[8.5px] text-slate-300 leading-relaxed">Revenue grew 18% to $18.4K MRR. Signups up 32%. Churn below 2%.</span>
+          </div>
+        </div>
+        <div className="flex gap-2 items-center">
+          <div className="w-5 h-5 rounded-full bg-[#a78bfa]/15 flex items-center justify-center flex-shrink-0">
+            <span className="text-[7px] font-bold text-[#a78bfa]">AI</span>
+          </div>
+          <div className="flex gap-1">
+            {[0,1,2].map(i => (
+              <motion.div key={i} className="w-1 h-1 rounded-full bg-[#a78bfa]/60"
+                animate={{ opacity: [0.3,1,0.3] }}
+                transition={{ duration: 1.1, delay: i*0.18, repeat: Infinity }}/>
+            ))}
           </div>
         </div>
       </div>
-    </div>
+    </WCard>
   )
 }
 
-function AutomationGraphic() {
-  const nodes = [
-    { label: 'Trigger', sub: 'New signup',   color: '#0f9b74' },
-    { label: 'Filter',  sub: 'Plan = Pro',   color: '#06b6d4' },
-    { label: 'Action',  sub: 'Send email',   color: '#8b5cf6' },
-    { label: 'Notify',  sub: 'Slack alert',  color: '#34d399' },
+function AutomationWidget() {
+  const steps = [
+    { label: 'New signup',        icon: '⚡', color: '#0f9b74' },
+    { label: 'Filter: plan=pro',  icon: '⊙', color: '#06b6d4' },
+    { label: 'Send welcome email',icon: '✉', color: '#8b5cf6' },
+    { label: 'Slack notify team', icon: '→', color: '#34d399' },
   ]
   return (
-    <div className="flex items-center justify-center h-full p-6 min-h-[260px]">
-      <div className="space-y-1.5 w-full max-w-[200px]">
-        {nodes.map((node, i) => (
-          <div key={node.label}>
-            <div className="bg-[#080d18] border rounded-xl p-2.5 flex items-center gap-2.5"
-              style={{ borderColor: `${node.color}28` }}>
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-[9px] font-bold"
-                style={{ background: `${node.color}18`, color: node.color }}>
-                {i + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-semibold text-white">{node.label}</div>
-                <div className="text-[8px] text-slate-500">{node.sub}</div>
-              </div>
-              <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: node.color }} />
+    <WCard label="Automation" dot="#06b6d4">
+      <div className="px-3.5 py-2.5 space-y-1">
+        {steps.map((s, i) => (
+          <div key={s.label}>
+            <div className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg bg-white/[0.03] border border-white/[0.05]">
+              <span className="text-[9px] flex-shrink-0" style={{ color: s.color }}>{s.icon}</span>
+              <span className="text-[8.5px] text-slate-300 flex-1">{s.label}</span>
+              <div className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0" style={{ background: s.color }}/>
             </div>
-            {i < nodes.length - 1 && (
-              <div className="flex justify-center py-0.5">
-                <div className="w-px h-2.5" style={{ background: `${node.color}25` }} />
+            {i < steps.length - 1 && (
+              <div className="flex justify-center my-0.5">
+                <div className="w-px h-2" style={{ background: `${s.color}30` }} />
               </div>
             )}
           </div>
         ))}
-        <div className="flex items-center justify-center gap-1.5 mt-2 bg-[#06b6d4]/8 border border-[#06b6d4]/20 rounded-xl py-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#06b6d4] animate-pulse" />
-          <span className="text-[9px] font-mono text-[#06b6d4]">847 runs today</span>
+        <div className="flex items-center justify-between pt-1.5 border-t border-white/[0.05]">
+          <span className="text-[7.5px] text-slate-600">847 runs today</span>
+          <span className="text-[7.5px] text-[#34d399] font-mono">100% success</span>
         </div>
       </div>
-    </div>
+    </WCard>
   )
 }
 
-function AnalyticsGraphic() {
-  return (
-    <div className="flex items-center justify-center h-full p-6 min-h-[260px]">
-      <div className="w-full max-w-[240px] space-y-2.5">
-        <div className="grid grid-cols-3 gap-1.5">
-          {[
-            { label: 'Visitors',   value: '12.4K', delta: '+18%',  color: '#0f9b74' },
-            { label: 'Conv.',      value: '3.8%',  delta: '+0.4%', color: '#06b6d4' },
-            { label: 'Bounce',     value: '32%',   delta: '-4%',   color: '#a78bfa' },
-          ].map(k => (
-            <div key={k.label} className="bg-[#080d18] border border-white/8 rounded-xl p-2 text-center">
-              <div className="text-[8px] text-slate-500">{k.label}</div>
-              <div className="text-[11px] font-bold text-white mt-0.5">{k.value}</div>
-              <div className="text-[8px] font-semibold mt-0.5" style={{ color: k.color }}>{k.delta}</div>
-            </div>
-          ))}
-        </div>
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[9px] text-slate-500">Traffic · 30 days</span>
-            <span className="text-[8px] text-[#0f9b74] font-mono">+18%</span>
-          </div>
-          <svg viewBox="0 0 200 55" className="w-full h-11">
-            <defs>
-              <linearGradient id="chartGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#0f9b74" stopOpacity="0.25" />
-                <stop offset="100%" stopColor="#0f9b74" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-            <path d="M0,52 L20,44 L40,46 L60,38 L80,40 L100,30 L120,24 L140,17 L160,12 L180,6 L200,3"
-              fill="none" stroke="#0f9b74" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M0,52 L20,44 L40,46 L60,38 L80,40 L100,30 L120,24 L140,17 L160,12 L180,6 L200,3 L200,55 L0,55 Z"
-              fill="url(#chartGrad)" />
-            <path d="M0,52 L28,50 L56,47 L84,44 L112,40 L140,36 L168,31 L200,26"
-              fill="none" stroke="#06b6d4" strokeWidth="1" strokeDasharray="3 2" opacity="0.45" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function APIGraphic() {
-  return (
-    <div className="flex items-center justify-center h-full p-6 min-h-[260px]">
-      <div className="w-full max-w-[240px] space-y-2.5">
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl p-4 font-mono">
-          <div className="flex items-center gap-1.5 mb-3">
-            <div className="w-2 h-2 rounded-full bg-[#f87171]/60" />
-            <div className="w-2 h-2 rounded-full bg-[#fbbf24]/60" />
-            <div className="w-2 h-2 rounded-full bg-[#34d399]/60" />
-            <span className="text-[8px] text-slate-600 ml-1">api.parallax.io</span>
-          </div>
-          <div className="space-y-0.5 text-[8px] leading-relaxed">
-            <div><span className="text-[#a78bfa]">const</span> <span className="text-[#67e8f9]">stripe</span> <span className="text-slate-500">= require(</span><span className="text-[#34d399]">'stripe'</span><span className="text-slate-500">)</span></div>
-            <div className="text-slate-600 mt-1">{'// '}Create subscription</div>
-            <div><span className="text-[#a78bfa]">await</span> <span className="text-[#67e8f9]">stripe</span><span className="text-slate-500">.subs.create({'{'}</span></div>
-            <div className="pl-3"><span className="text-[#fbbf24]">customer</span><span className="text-slate-500">: userId,</span></div>
-            <div className="pl-3"><span className="text-[#fbbf24]">plan</span><span className="text-slate-500">: </span><span className="text-[#34d399]">'pro'</span></div>
-            <div><span className="text-slate-500">{'})'}</span></div>
-          </div>
-        </div>
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl p-3">
-          <div className="text-[8px] text-slate-500 mb-2">Connected services</div>
-          <div className="flex flex-wrap gap-1.5">
-            {['Stripe', 'Slack', 'Twilio', 'SendGrid', 'OpenAI'].map((s, i) => (
-              <span key={s} className="text-[8px] px-2 py-0.5 rounded-full border font-medium"
-                style={{
-                  color:        ['#0f9b74','#06b6d4','#8b5cf6','#34d399','#a78bfa'][i],
-                  borderColor: `${['#0f9b74','#06b6d4','#8b5cf6','#34d399','#a78bfa'][i]}30`,
-                  background:  `${['#0f9b74','#06b6d4','#8b5cf6','#34d399','#a78bfa'][i]}10`,
-                }}>
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function CommunicationGraphic() {
-  return (
-    <div className="flex items-center justify-center h-full p-5 min-h-[260px]">
-      <div className="w-full max-w-[250px] grid grid-cols-2 gap-2">
-        <div className="bg-[#080d18] border border-white/10 rounded-xl p-3 space-y-1.5">
-          <div className="text-[8px] text-[#06b6d4] font-bold uppercase tracking-wider mb-1.5">Email</div>
-          <div className="h-3.5 bg-white/8 rounded" />
-          <div className="h-2.5 bg-white/5 rounded w-4/5" />
-          <div className="h-2.5 bg-white/5 rounded w-3/5" />
-          <div className="h-2.5 bg-white/5 rounded w-4/5" />
-          <div className="h-6 rounded-lg mt-2 flex items-center justify-center"
-            style={{ background: 'rgba(15,155,116,0.15)', border: '1px solid rgba(15,155,116,0.25)' }}>
-            <span className="text-[7px] font-semibold text-[#0f9b74]">Open now →</span>
-          </div>
-          <div className="flex items-center gap-1 mt-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#34d399]" />
-            <span className="text-[7px] text-[#34d399] font-mono">42% open</span>
-          </div>
-        </div>
-        <div className="bg-[#080d18] border border-white/10 rounded-xl p-2.5 space-y-2">
-          <div className="text-[8px] text-[#34d399] font-bold uppercase tracking-wider mb-1.5">SMS</div>
-          <div className="flex justify-end">
-            <div className="bg-[#0f9b74]/12 border border-[#0f9b74]/22 rounded-xl rounded-tr-sm px-2 py-1.5">
-              <span className="text-[7px] text-slate-300 leading-relaxed">Order confirmed! Track it here.</span>
-            </div>
-          </div>
-          <div className="flex">
-            <div className="bg-white/5 border border-white/8 rounded-xl rounded-tl-sm px-2 py-1.5">
-              <span className="text-[7px] text-slate-400">Got it, thanks!</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-1 mt-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#06b6d4]" />
-            <span className="text-[7px] text-[#06b6d4] font-mono">98% delivered</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function DatabaseGraphic() {
-  const rows = [
-    { id: '001', name: 'Acme Corp',  plan: 'Enterprise', status: 'Active', color: '#34d399' },
-    { id: '002', name: 'BuildCo',    plan: 'Pro',        status: 'Active', color: '#34d399' },
-    { id: '003', name: 'SkyTech',    plan: 'Starter',    status: 'Trial',  color: '#fbbf24' },
-    { id: '004', name: 'DataFlow',   plan: 'Enterprise', status: 'Active', color: '#34d399' },
+function SMSWidget() {
+  const msgs = [
+    { text: 'Invoice #1094 is ready — pay here: pay.co/1094', out: true,  time: '9:41 AM' },
+    { text: 'On it, paying now!',                              out: false, time: '9:44 AM' },
+    { text: 'Payment confirmed ✓ Thanks, Sarah!',             out: true,  time: '9:44 AM' },
   ]
   return (
-    <div className="flex items-center justify-center h-full p-5 min-h-[260px]">
-      <div className="w-full max-w-[260px]">
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-4 gap-1 px-3 py-2 border-b border-white/6">
-            {['ID', 'Name', 'Plan', 'Status'].map(h => (
-              <span key={h} className="text-[7px] font-semibold text-slate-500 uppercase tracking-wide">{h}</span>
-            ))}
+    <WCard label="SMS" dot="#34d399">
+      <div className="px-3.5 py-3 space-y-2">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-5 h-5 rounded-full bg-[#34d399]/15 flex items-center justify-center">
+            <span className="text-[7px] font-bold text-[#34d399]">P</span>
           </div>
-          {rows.map(row => (
-            <div key={row.id} className="grid grid-cols-4 gap-1 px-3 py-2 border-b border-white/4 last:border-0">
-              <span className="text-[8px] font-mono text-slate-600">{row.id}</span>
-              <span className="text-[8px] text-slate-300">{row.name}</span>
-              <span className="text-[8px] text-slate-400">{row.plan}</span>
-              <span className="text-[8px] font-semibold" style={{ color: row.color }}>{row.status}</span>
-            </div>
+          <span className="text-[8px] text-slate-400">Parallax · +1 (555) 012-3456</span>
+          <span className="text-[7px] text-[#34d399] ml-auto">Twilio</span>
+        </div>
+        {msgs.map((m, i) => (
+          <div key={i} className={`px-2.5 py-1.5 rounded-2xl text-[8px] leading-relaxed max-w-[88%] ${m.out ? 'ml-auto rounded-tr-sm' : 'rounded-tl-sm'}`}
+            style={m.out
+              ? { background: 'rgba(15,155,116,0.15)', border: '1px solid rgba(15,155,116,0.2)', color: '#a7f3d0' }
+              : { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)', color: '#94a3b8' }
+            }>
+            {m.text}
+            <div className="text-[6.5px] text-slate-700 mt-0.5">{m.time}</div>
+          </div>
+        ))}
+        <div className="text-[7.5px] text-[#34d399] font-mono text-right">98% delivered</div>
+      </div>
+    </WCard>
+  )
+}
+
+function DatabaseWidget() {
+  const rows = [
+    { id: '001', name: 'Acme Corp', plan: 'Enterprise', status: 'Active',  c: '#34d399' },
+    { id: '002', name: 'BuildCo',   plan: 'Pro',        status: 'Active',  c: '#34d399' },
+    { id: '003', name: 'SkyTech',   plan: 'Starter',    status: 'Trial',   c: '#fbbf24' },
+    { id: '004', name: 'DataFlow',  plan: 'Enterprise', status: 'Active',  c: '#34d399' },
+  ]
+  return (
+    <WCard label="Database" dot="#67e8f9">
+      <div>
+        <div className="grid grid-cols-4 gap-1 px-3.5 py-1.5 border-b border-white/[0.06]">
+          {['ID','Name','Plan','Status'].map(h => (
+            <span key={h} className="text-[6.5px] font-bold text-slate-600 uppercase tracking-wide">{h}</span>
           ))}
         </div>
-        <div className="flex items-center justify-between mt-2 px-1">
-          <span className="text-[8px] text-slate-600 font-mono">2.1M records</span>
-          <span className="text-[8px] text-[#67e8f9] font-mono">≤ 12ms avg</span>
+        {rows.map(r => (
+          <div key={r.id} className="grid grid-cols-4 gap-1 px-3.5 py-1.5 border-b border-white/[0.04] last:border-0">
+            <span className="text-[7.5px] font-mono text-slate-600">{r.id}</span>
+            <span className="text-[7.5px] text-slate-300">{r.name}</span>
+            <span className="text-[7.5px] text-slate-500">{r.plan}</span>
+            <span className="text-[7.5px] font-semibold" style={{ color: r.c }}>{r.status}</span>
+          </div>
+        ))}
+        <div className="flex items-center justify-between px-3.5 py-2">
+          <span className="text-[7px] text-slate-600 font-mono">2.1M records</span>
+          <span className="text-[7px] text-[#67e8f9] font-mono">≤12ms avg</span>
         </div>
       </div>
-    </div>
+    </WCard>
   )
 }
 
-function UIGraphic() {
-  return (
-    <div className="flex items-center justify-center h-full p-6 min-h-[260px]">
-      <div className="w-full max-w-[230px] space-y-2.5">
-        <div className="bg-[#080d18] border border-white/10 rounded-2xl p-4 space-y-3">
-          <div className="text-[8px] text-slate-500 uppercase tracking-wider font-semibold">Component Library</div>
-          <div className="flex gap-1.5">
-            <div className="flex-1 h-7 rounded-lg text-[8px] font-bold text-white flex items-center justify-center"
-              style={{ background: AURORA }}>
-              Primary
-            </div>
-            <div className="flex-1 h-7 rounded-lg text-[8px] font-semibold text-slate-300 flex items-center justify-center bg-white/5 border border-white/10">
-              Secondary
-            </div>
-          </div>
-          <div className="h-7 bg-white/4 border border-white/8 rounded-lg px-2.5 flex items-center gap-1.5">
-            <span className="text-[8px] text-slate-500">Search components...</span>
-            <div className="ml-auto w-px h-3 bg-[#0f9b74] animate-blink" />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[8px] text-slate-500 mr-0.5">Palette</span>
-            {['#0f9b74','#06b6d4','#8b5cf6','#34d399','#0c1426'].map(c => (
-              <div key={c} className="w-4 h-4 rounded-md border border-white/10" style={{ background: c }} />
-            ))}
-          </div>
-          <div className="bg-white/3 border border-white/6 rounded-xl p-2.5 flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-[#8b5cf6]/20 flex items-center justify-center">
-              <Layout className="w-3 h-3 text-[#8b5cf6]" />
-            </div>
-            <div>
-              <div className="text-[8px] font-semibold text-white">Dashboard card</div>
-              <div className="text-[7px] text-slate-500">Custom component</div>
-            </div>
-            <div className="ml-auto w-2 h-2 rounded-full bg-[#8b5cf6] opacity-60" />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+// ─── Position groups by screen third (xl ≥ 1280 px) ─────────────────────────
+// Slot 0 → LEFT THIRD  (widget fits within 0–427 px)
+// Slot 1 → MIDDLE THIRD (widget fits within 427–853 px, all below caption)
+// Slot 2 → RIGHT THIRD  (widget fits within 853–1280 px)
+// 4 spots per third → 4³ = 64 possible layouts. Varied tops so nothing aligns.
+const POS_LEFT = [
+  { left: '40px', top: '16%' },   // edge, upper
+  { left: '40px', top: '57%' },   // edge, lower
+  { left: '9%',   top: '33%' },   // inset, mid-upper
+  { left: '9%',   top: '71%' },   // inset, lower
+]
+const POS_MIDDLE = [
+  { left: 'calc(50% - 120px)', top: '55%' },  // centered, upper-lower
+  { left: 'calc(50% - 120px)', top: '72%' },  // centered, very low
+  { left: '34%',               top: '62%' },  // left-of-center
+  { left: '44%',               top: '68%' },  // right-of-center
+]
+const POS_RIGHT = [
+  { right: '40px', top: '22%' },  // edge, upper (offset from left)
+  { right: '40px', top: '62%' },  // edge, lower
+  { right: '9%',   top: '40%' },  // inset, mid
+  { right: '9%',   top: '74%' },  // inset, lower
+]
+const POSITIONS = [...POS_LEFT, ...POS_MIDDLE, ...POS_RIGHT]
+// Index map: LEFT=[0–3]  MIDDLE=[4–7]  RIGHT=[8–11]
+const GROUP_RANGES = [[0,1,2,3], [4,5,6,7], [8,9,10,11]]
 
-// ─── Feature data ─────────────────────────────────────────────────────────────
-const FEATURES = [
-  {
-    id: 0, word: 'security', label: 'Authentication', Icon: Lock,
-    desc: 'Enterprise-grade identity and access management with SSO, MFA, and role-based permissions.',
-    stats: [{ label: '2,847 sessions', color: '#0f9b74' }, { label: 'SSO + MFA', color: '#34d399' }],
-    Graphic: AuthGraphic,
-  },
-  {
-    id: 1, word: 'payments', label: 'Payments', Icon: CreditCard,
-    desc: 'Billing, subscriptions, and revenue infrastructure that scales with your business.',
-    stats: [{ label: '$18.4K MRR', color: '#34d399' }, { label: '99.9% uptime', color: '#0f9b74' }],
-    Graphic: PaymentsGraphic,
-  },
-  {
-    id: 2, word: 'intelligence', label: 'AI Integration', Icon: Sparkles,
-    desc: 'AI-powered assistants, copilots, and intelligent workflows embedded in your product.',
-    stats: [{ label: 'GPT-4 Turbo', color: '#a78bfa' }, { label: 'Custom fine-tune', color: '#8b5cf6' }],
-    Graphic: AIGraphic,
-  },
-  {
-    id: 3, word: 'automation', label: 'Automation', Icon: GitBranch,
-    desc: 'Trigger-based workflows that replace repetitive operations and accelerate your team.',
-    stats: [{ label: '847 runs/day', color: '#22d3ee' }, { label: 'Zero-latency', color: '#06b6d4' }],
-    Graphic: AutomationGraphic,
-  },
-  {
-    id: 4, word: 'analytics', label: 'Analytics', Icon: BarChart2,
-    desc: 'Real-time performance metrics, conversion tracking, and user behavior insights.',
-    stats: [{ label: '+18% traffic', color: '#fb923c' }, { label: '3.8% conv.', color: '#0f9b74' }],
-    Graphic: AnalyticsGraphic,
-  },
-  {
-    id: 5, word: 'integration', label: 'API Integrations', Icon: Plug,
-    desc: 'Connect your platform to every tool and third-party service it depends on.',
-    stats: [{ label: '99.9% uptime', color: '#6ee7b7' }, { label: '50+ services', color: '#8b5cf6' }],
-    Graphic: APIGraphic,
-  },
-  {
-    id: 6, word: 'communication', label: 'Communication', Icon: MessageSquare,
-    desc: 'Lifecycle email and SMS systems for onboarding, nurture, alerts, and conversion.',
-    stats: [{ label: '42% open rate', color: '#4ade80' }, { label: '98% delivered', color: '#06b6d4' }],
-    Graphic: CommunicationGraphic,
-  },
-  {
-    id: 7, word: 'infrastructure', label: 'Databases', Icon: Database,
-    desc: 'Operational data infrastructure with visibility, structure, and blazing-fast queries.',
-    stats: [{ label: '2.1M records', color: '#67e8f9' }, { label: '≤12ms avg', color: '#0f9b74' }],
-    Graphic: DatabaseGraphic,
-  },
-  {
-    id: 8, word: 'experience', label: 'UI / Design', Icon: Layout,
-    desc: 'Custom interfaces and design systems that reflect your brand at every touchpoint.',
-    stats: [{ label: 'Custom design', color: '#8b5cf6' }, { label: 'Pixel-perfect', color: '#a78bfa' }],
-    Graphic: UIGraphic,
-  },
+const FLOATS = [
+  { x:[0,6,-3,0], y:[0,-5,3,0], r:[0,-0.3,0.2,0], dur:9   },
+  { x:[0,5,-7,0], y:[0,-4,5,0], r:[0,0.3,-0.4,0], dur:11  },
+  { x:[0,7,-4,0], y:[0,5,-4,0], r:[0,-0.4,0.3,0], dur:9.5 },
+  { x:[0,-6,4,0], y:[0,-5,6,0], r:[0,0.4,-0.3,0], dur:10  },
+  { x:[0,-5,7,0], y:[0,-7,4,0], r:[0,0.5,-0.4,0], dur:8.5 },
 ]
 
-// ─── Ambient background ───────────────────────────────────────────────────────
-function AmbientBg({ mouseX, mouseY }) {
-  const gx = useSpring(mouseX, { stiffness: 55, damping: 22 })
-  const gy = useSpring(mouseY, { stiffness: 55, damping: 22 })
+const WIDGETS = [
+  AuthWidget, PaymentsWidget, AIWidget, AutomationWidget, AnalyticsWidget,
+  UIWidget, EmailWidget, APIWidget, SMSWidget, DatabaseWidget,
+]
 
+function shuffleArr(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+// Build the initial 3 entries — one position from each group
+function initActive() {
+  return GROUP_RANGES.map((group, slotIdx) => {
+    const posIdx = group[Math.floor(Math.random() * group.length)]
+    return { uid: slotIdx, Component: WIDGETS[slotIdx], posIdx }
+  })
+}
+
+// ─── Ambient background ───────────────────────────────────────────────────────
+function AmbientBg() {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none">
-      <div
-        className="absolute inset-0 opacity-[0.02]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.7) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.7) 1px, transparent 1px)
-          `,
-          backgroundSize: '72px 72px',
-        }}
-      />
-      <div className="absolute rounded-full blur-[140px] animate-glow-pulse-slow"
-        style={{ width: 680, height: 680, top: '-15%', left: '5%',
-          background: 'radial-gradient(circle, rgba(15,155,116,0.10), transparent 70%)' }} />
-      <div className="absolute rounded-full blur-[120px] animate-glow-pulse-slow"
-        style={{ width: 560, height: 560, bottom: '-5%', right: '0%',
-          background: 'radial-gradient(circle, rgba(139,92,246,0.09), transparent 70%)',
-          animationDelay: '2.5s' }} />
-      <div className="absolute rounded-full blur-[100px] animate-glow-pulse-slow"
-        style={{ width: 400, height: 400, top: '30%', right: '30%',
-          background: 'radial-gradient(circle, rgba(6,182,212,0.07), transparent 70%)',
-          animationDelay: '4s' }} />
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: useTransform(
-            [gx, gy],
-            ([x, y]) => `radial-gradient(500px circle at ${x}px ${y}px, rgba(15,155,116,0.07), transparent 55%)`
-          ),
-        }}
-      />
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute inset-0 bg-[#080d18]" />
+      <div className="absolute inset-0 opacity-[0.018]" style={{
+        backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)',
+        backgroundSize: '80px 80px',
+      }}/>
+      <div className="absolute rounded-full blur-[160px] animate-glow-pulse-slow"
+        style={{ width:700, height:700, top:'-20%', left:'0%', background:'radial-gradient(circle, rgba(15,155,116,0.10), transparent 70%)' }}/>
+      <div className="absolute rounded-full blur-[130px] animate-glow-pulse-slow"
+        style={{ width:600, height:600, bottom:'-10%', right:'-5%', background:'radial-gradient(circle, rgba(139,92,246,0.09), transparent 70%)', animationDelay:'2.5s' }}/>
+      <div className="absolute rounded-full blur-[110px] animate-glow-pulse-slow"
+        style={{ width:440, height:440, top:'35%', right:'28%', background:'radial-gradient(circle, rgba(6,182,212,0.07), transparent 70%)', animationDelay:'4s' }}/>
     </div>
   )
 }
 
+// ─── Entrance ─────────────────────────────────────────────────────────────────
 const entrance = {
-  container: { hidden: {}, show: { transition: { staggerChildren: 0.08, delayChildren: 0.12 } } },
-  item: { hidden: { opacity: 0, y: 18 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] } } },
+  container: { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.25 } } },
+  item: { hidden: { opacity:0, y:22 }, show: { opacity:1, y:0, transition:{ duration:0.8, ease:[0.21,0.47,0.32,0.98] } } },
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Hero() {
   const containerRef = useRef(null)
-  const sectionRef   = useRef(null)
 
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] })
   const contentOpacity = useTransform(scrollYProgress, [0, 0.38], [1, 0])
-  const contentY       = useTransform(scrollYProgress, [0, 0.38], [0, -48])
-  const bgScale        = useTransform(scrollYProgress, [0, 0.7],  [1, 1.05])
-  const veilOpacity    = useTransform(scrollYProgress, [0.18, 0.56], [0, 1])
+  const contentY       = useTransform(scrollYProgress, [0, 0.38], [0, -56])
+  const bgScale        = useTransform(scrollYProgress, [0, 0.7],  [1, 1.04])
+  const veilOpacity    = useTransform(scrollYProgress, [0.2, 0.55], [0, 1])
   const hintOpacity    = useTransform(scrollYProgress, [0, 0.09], [1, 0])
 
-  const rawX = useMotionValue(0)
-  const rawY = useMotionValue(0)
-
-  const handleMouseMove = useCallback((e) => {
-    const rect = sectionRef.current?.getBoundingClientRect()
-    if (!rect) return
-    rawX.set(e.clientX - rect.left)
-    rawY.set(e.clientY - rect.top)
-  }, [rawX, rawY])
-
-  const [activeId, setActiveId]   = useState(0)
-  const [hoveredId, setHoveredId] = useState(null)
-  const displayId = hoveredId !== null ? hoveredId : activeId
+  // Word typewriter cycling
+  const [wordIndex, setWordIndex] = useState(0)
+  const [typedWord, setTypedWord] = useState('')
+  const [deleting, setDeleting]   = useState(false)
 
   useEffect(() => {
-    if (hoveredId !== null) return
-    const t = setInterval(() => setActiveId(i => (i + 1) % FEATURES.length), 3000)
-    return () => clearInterval(t)
-  }, [hoveredId])
+    const target = WORDS[wordIndex]
+    let id
+    if (!deleting && typedWord !== target) {
+      id = setTimeout(() => setTypedWord(target.slice(0, typedWord.length + 1)), 38)
+    } else if (!deleting && typedWord === target) {
+      id = setTimeout(() => setDeleting(true), 2600)
+    } else if (deleting && typedWord.length > 0) {
+      id = setTimeout(() => setTypedWord(target.slice(0, typedWord.length - 1)), 22)
+    } else {
+      id = setTimeout(() => { setDeleting(false); setWordIndex(i => (i + 1) % WORDS.length) }, 200)
+    }
+    return () => clearTimeout(id)
+  }, [typedWord, wordIndex, deleting])
 
-  const active = FEATURES[displayId]
-  const ActiveIcon = active.Icon
-  const ActiveGraphic = active.Graphic
+  // Exactly 3 widgets visible; one is replaced every 3333 ms → each lives ~10 s
+  const [active, setActive] = useState(initActive)
+  const uidRef    = useRef(3)   // next unique key (starts after initial 3)
+  const wIdxRef   = useRef(3)   // next widget index
+  const slotRef   = useRef(0)   // which of the 3 slots to swap next
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const slot = slotRef.current % 3
+      slotRef.current++
+      setActive(prev => {
+        const group     = GROUP_RANGES[slot]
+        const curPosIdx = prev[slot].posIdx
+        // pick a different position within this slot's group
+        const choices   = group.filter(p => p !== curPosIdx)
+        const newPos    = choices[Math.floor(Math.random() * choices.length)]
+        const next      = [...prev]
+        next[slot]      = { uid: uidRef.current++, Component: WIDGETS[wIdxRef.current++ % WIDGETS.length], posIdx: newPos }
+        return next
+      })
+    }, 3333)
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <div ref={containerRef} style={{ height: '220vh' }}>
-      <div
-        ref={sectionRef}
-        className="sticky top-0 h-screen overflow-hidden"
-        onMouseMove={handleMouseMove}
-      >
+      <div className="sticky top-0 h-screen overflow-hidden">
+
+        {/* Background */}
         <motion.div className="absolute inset-0" style={{ scale: bgScale }}>
-          <AmbientBg mouseX={rawX} mouseY={rawY} />
+          <AmbientBg />
         </motion.div>
 
-        <motion.div
-          className="absolute inset-0 bg-[#080d18] pointer-events-none z-20"
-          style={{ opacity: veilOpacity }}
-        />
+        {/* Scroll veil */}
+        <motion.div className="absolute inset-0 bg-[#080d18] pointer-events-none z-20" style={{ opacity: veilOpacity }} />
 
+        {/* Exactly 3 widgets, xl+ only so edge columns clear the caption */}
+        <div className="absolute inset-0 z-10 hidden xl:block pointer-events-none">
+          <AnimatePresence>
+            {active.map(({ uid, Component, posIdx }) => {
+              const float = FLOATS[uid % FLOATS.length]
+              return (
+                <motion.div
+                  key={uid}
+                  className="absolute"
+                  style={POSITIONS[posIdx]}
+                  initial={{ opacity: 0, scale: 0.88, filter: 'blur(10px)' }}
+                  animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', x: float.x, y: float.y, rotate: float.r }}
+                  exit={{ opacity: 0, scale: 0.88, filter: 'blur(10px)' }}
+                  transition={{
+                    opacity: TX_DUR, scale: TX_DUR, filter: TX_DUR,
+                    x:      { duration: float.dur,       repeat: Infinity, ease: 'easeInOut' },
+                    y:      { duration: float.dur + 0.5, repeat: Infinity, ease: 'easeInOut' },
+                    rotate: { duration: float.dur + 1,   repeat: Infinity, ease: 'easeInOut' },
+                  }}
+                >
+                  <Component />
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
+        </div>
+
+        {/* Hero text */}
         <motion.div
-          className="relative z-10 h-full flex flex-col items-center justify-center px-6 pt-16 pb-8"
+          className="relative z-30 h-full flex flex-col items-center px-6 pt-28"
           style={{ opacity: contentOpacity, y: contentY }}
         >
           <motion.div
             variants={entrance.container}
             initial="hidden"
             animate="show"
-            className="w-full max-w-5xl flex flex-col items-center gap-5"
+            className="w-full max-w-2xl flex flex-col items-center gap-6"
           >
-
-            {/* Headline */}
             <motion.div variants={entrance.item} className="text-center">
-              <h1 className="text-[clamp(1.75rem,3.8vw,3.4rem)] leading-[1.08] tracking-tight">
-                <span className="block text-slate-500 font-light">Hold your business to the</span>
-                <span className="block font-light">
-                  <span className="text-slate-400">highest standard of </span>
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key={active.word}
-                      initial={{ opacity: 0, y: '50%', filter: 'blur(6px)' }}
-                      animate={{ opacity: 1, y: '0%',  filter: 'blur(0px)' }}
-                      exit={{    opacity: 0, y: '-40%', filter: 'blur(5px)' }}
-                      transition={{ duration: 0.4, ease: [0.21, 0.47, 0.32, 0.98] }}
-                      className="inline-block font-extrabold italic bg-clip-text text-transparent"
-                      style={{ backgroundImage: AURORA }}
-                    >
-                      {active.word}
-                    </motion.span>
-                  </AnimatePresence>
+              <h1
+                className="font-extrabold tracking-tight leading-[1.12] text-white"
+                style={{
+                  fontSize: 'clamp(1.6rem, 3.2vw, 3rem)',
+                  textShadow: '0 2px 32px rgba(8,13,24,1), 0 0 80px rgba(8,13,24,0.95)',
+                }}
+              >
+                <span className="block">Elevate your business to the</span>
+                <span className="block">highest standard of</span>
+                <span className="block mt-1 h-[1.18em]">
+                  <span
+                    className="italic bg-clip-text text-transparent"
+                    style={{ backgroundImage: 'linear-gradient(135deg, #34ffc2 0%, #38d9f5 55%, #c4abff 100%)' }}
+                  >
+                    {typedWord}
+                  </span>
+                  <motion.span
+                    aria-hidden
+                    className="inline-block align-baseline w-[0.07em] h-[0.85em] rounded-sm bg-cyan-300 ml-0.5"
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ duration: 0.85, repeat: Infinity, ease: 'easeInOut' }}
+                  />
                 </span>
               </h1>
             </motion.div>
 
-            {/* Feature tab strip */}
-            <motion.div variants={entrance.item} className="w-full max-w-4xl">
-              <div className="flex gap-1.5 overflow-x-auto scrollbar-none pb-1">
-                {FEATURES.map(f => {
-                  const FIcon = f.Icon
-                  const isActive = displayId === f.id
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => { setActiveId(f.id); setHoveredId(null) }}
-                      onMouseEnter={() => setHoveredId(f.id)}
-                      onMouseLeave={() => setHoveredId(null)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0"
-                      style={isActive ? {
-                        background: AURORA,
-                        color: '#fff',
-                        boxShadow: '0 2px 14px rgba(15,155,116,0.32)',
-                      } : {
-                        background: 'rgba(255,255,255,0.04)',
-                        color: '#64748b',
-                        border: '1px solid rgba(255,255,255,0.07)',
-                      }}
-                    >
-                      <FIcon className="w-3 h-3 flex-shrink-0" />
-                      {f.label}
-                    </button>
-                  )
-                })}
-              </div>
-            </motion.div>
-
-            {/* Large feature widget */}
-            <motion.div variants={entrance.item} className="w-full max-w-4xl">
-              <div
-                className="relative rounded-3xl overflow-hidden"
-                style={{
-                  background: 'linear-gradient(#0c1426, #0c1426) padding-box, linear-gradient(135deg, #0f9b74, #06b6d4, #8b5cf6) border-box',
-                  border: '1px solid transparent',
-                  boxShadow: '0 0 60px rgba(15,155,116,0.10), 0 0 120px rgba(6,182,212,0.05), 0 20px 60px rgba(0,0,0,0.5)',
-                }}
+            <motion.div variants={entrance.item}>
+              <p
+                className="text-center text-[0.95rem] text-slate-300 leading-relaxed max-w-md"
+                style={{ textShadow: '0 1px 16px rgba(8,13,24,1)' }}
               >
-                {/* Top edge glow */}
-                <div className="absolute top-0 left-1/4 right-1/4 h-px opacity-75"
-                  style={{ background: AURORA }} />
-
-                <div className="grid grid-cols-1 lg:grid-cols-[5fr_7fr]">
-                  {/* Info panel */}
-                  <div className="p-7 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/6 min-h-[260px]">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={active.id}
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 8 }}
-                        transition={{ duration: 0.28 }}
-                      >
-                        <div
-                          className="w-11 h-11 rounded-2xl flex items-center justify-center mb-4"
-                          style={{ background: 'rgba(15,155,116,0.15)', color: '#0f9b74' }}
-                        >
-                          <ActiveIcon className="w-5 h-5" />
-                        </div>
-                        <h3 className="text-lg font-bold text-white mb-2">{active.label}</h3>
-                        <p className="text-sm text-slate-400 leading-relaxed">{active.desc}</p>
-                      </motion.div>
-                    </AnimatePresence>
-
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={`${active.id}-stats`}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex flex-wrap gap-2 mt-5"
-                      >
-                        {active.stats.map(s => (
-                          <span
-                            key={s.label}
-                            className="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-xl"
-                            style={{
-                              color: s.color,
-                              background: `${s.color}12`,
-                              border: `1px solid ${s.color}25`,
-                            }}
-                          >
-                            {s.label}
-                          </span>
-                        ))}
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Graphic panel */}
-                  <div
-                    className="relative overflow-hidden"
-                    style={{ background: 'rgba(8,13,24,0.35)', minHeight: '260px' }}
-                  >
-                    <div
-                      className="absolute inset-0 pointer-events-none"
-                      style={{ background: 'radial-gradient(ellipse at 70% 25%, rgba(15,155,116,0.05), transparent 60%)' }}
-                    />
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={`${active.id}-graphic`}
-                        initial={{ opacity: 0, scale: 0.97 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.02 }}
-                        transition={{ duration: 0.35, ease: [0.21, 0.47, 0.32, 0.98] }}
-                        className="h-full w-full"
-                      >
-                        <ActiveGraphic />
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-                </div>
-              </div>
+                Crafting next-generation software tailored to the unique operations of our clients.
+              </p>
             </motion.div>
-
-            {/* CTAs */}
-            <motion.div variants={entrance.item} className="flex flex-wrap gap-3 justify-center">
-              <Link
-                to="/contact"
-                className="group flex items-center gap-2 px-7 py-3 text-sm font-bold rounded-xl text-white transition-all duration-200 hover:-translate-y-0.5"
-                style={{ background: AURORA, boxShadow: '0 4px 24px rgba(15,155,116,0.30)' }}
-              >
-                Start a project
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-              <a
-                href="#capabilities"
-                className="flex items-center gap-2 px-7 py-3 bg-white/5 hover:bg-white/8 text-slate-300 hover:text-white text-sm font-bold rounded-xl border border-white/8 hover:border-white/15 transition-all duration-200"
-              >
-                Explore capabilities
-              </a>
-            </motion.div>
-
           </motion.div>
         </motion.div>
 
         {/* Scroll hint */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2"
           style={{ opacity: hintOpacity }}
         >
-          <span className="text-[10px] text-slate-700 tracking-[0.22em] uppercase">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 5, 0] }}
-            transition={{ duration: 1.7, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <ChevronDown className="w-4 h-4 text-slate-700" />
+          <span className="text-[10px] text-slate-600 tracking-[0.22em] uppercase">Scroll</span>
+          <motion.div animate={{ y:[0,5,0] }} transition={{ duration:1.7, repeat:Infinity, ease:'easeInOut' }}>
+            <ChevronDown className="w-4 h-4 text-slate-600" />
           </motion.div>
         </motion.div>
 

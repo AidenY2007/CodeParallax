@@ -40,10 +40,7 @@ export default function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 group">
           <img src={parallaxLogo} alt="Parallax" className="h-8 w-auto object-contain" />
-          <span
-            className="text-base font-bold tracking-tight bg-clip-text text-transparent"
-            style={{ backgroundImage: AURORA }}
-          >
+          <span className="text-base font-bold tracking-tight text-white">
             Parallax
           </span>
         </Link>
