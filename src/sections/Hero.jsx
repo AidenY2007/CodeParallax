@@ -3,6 +3,7 @@ import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ChevronDown } from 'lucide-react'
 import googleLogo from '../assets/google.svg.png'
+import worldMapCropped from '../assets/world-map-cropped.png'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
@@ -47,101 +48,135 @@ function WCard({ label, dot, children, width = 240 }) {
 
 // ─── 10 Detailed Widgets ──────────────────────────────────────────────────────
 
-const TOTP_CODES = ['482 193', '751 034', '296 817', '638 405', '103 582']
+const AUTH_NODES = [
+  { x: 18,  y: 50, label: 'client',  dy: -9 },
+  { x: 62,  y: 13, label: 'auth',    dy: -8 },
+  { x: 107, y: 28, label: 'token',   dy: -8 },
+  { x: 97,  y: 74, label: 'CA',      dy: 13 },
+  { x: 35,  y: 84, label: 'session', dy: 12 },
+]
+const AUTH_EDGES = [[0,1],[0,2],[0,4],[1,2],[1,3],[2,3],[1,4]]
+const AUTH_FLOW = [
+  { from: 0, to: 1, msg: 'auth request'  },
+  { from: 1, to: 3, msg: 'verify cert'   },
+  { from: 3, to: 1, msg: 'cert valid'    },
+  { from: 1, to: 2, msg: 'sign token'    },
+  { from: 1, to: 0, msg: 'token issued'  },
+  { from: 0, to: 4, msg: 'session open'  },
+]
+const PACKET_MS = 1050
 
 function AuthWidget() {
-  const [codeIdx, setCodeIdx] = useState(0)
-  const [progress, setProgress] = useState(100)
+  const [step, setStep] = useState(0)
+  const [litNodes, setLitNodes] = useState([0])
+  const [done, setDone] = useState(false)
 
   useEffect(() => {
-    const DURATION = 5000
-    const TICK = 60
-    let elapsed = 0
-    const id = setInterval(() => {
-      elapsed += TICK
-      const pct = 100 - (elapsed / DURATION) * 100
-      if (pct <= 0) {
-        setCodeIdx(i => (i + 1) % TOTP_CODES.length)
-        elapsed = 0
-        setProgress(100)
-      } else {
-        setProgress(pct)
-      }
-    }, TICK)
-    return () => clearInterval(id)
-  }, [])
+    if (done) {
+      const id = setTimeout(() => { setStep(0); setLitNodes([0]); setDone(false) }, 2200)
+      return () => clearTimeout(id)
+    }
+    if (step >= AUTH_FLOW.length) { setDone(true); return }
+    const { to } = AUTH_FLOW[step]
+    const id = setTimeout(() => {
+      setLitNodes(prev => [...new Set([...prev, to])])
+      setStep(s => s + 1)
+    }, PACKET_MS)
+    return () => clearTimeout(id)
+  }, [step, done])
 
-  const seconds = Math.round((progress / 100) * 30)
-  const progressColor = progress > 40 ? '#0f9b74' : progress > 15 ? '#fbbf24' : '#f87171'
+  const curFlow = AUTH_FLOW[Math.min(step, AUTH_FLOW.length - 1)]
+  const accent = done ? '#0f9b74' : '#67e8f9'
 
   return (
-    <WCard label="Authentication" dot="#0f9b74">
-      <div className="px-3.5 py-3 space-y-2.5">
+    <WCard label="Authentication" dot={accent}>
+      <div className="px-3.5 py-2.5">
 
-        {/* Algorithm badges + status */}
-        <div className="flex items-center gap-1.5">
-          {['RS256', 'AES-256'].map(a => (
-            <span key={a} className="text-[7px] px-1.5 py-0.5 rounded font-mono bg-white/[0.05] border border-white/[0.08] text-slate-500">{a}</span>
-          ))}
-          <span className="ml-auto text-[7px] font-semibold text-[#0f9b74] flex items-center gap-1">
-            <span className="w-1 h-1 rounded-full bg-[#0f9b74] inline-block" />
-            verified
-          </span>
+        {/* Network graph */}
+        <div className="rounded-lg overflow-hidden mb-1.5"
+          style={{ background: 'rgba(4,6,12,0.7)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <svg viewBox="0 0 125 100" width="100%" height="88" style={{ display: 'block' }}>
+            <defs>
+              <filter id="pglow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur stdDeviation="2.5" result="b" />
+                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+
+            {/* Edges */}
+            {AUTH_EDGES.map(([a, b], i) => {
+              const na = AUTH_NODES[a], nb = AUTH_NODES[b]
+              const active = !done && step < AUTH_FLOW.length &&
+                ((curFlow.from === a && curFlow.to === b) || (curFlow.from === b && curFlow.to === a))
+              return (
+                <motion.line key={i} x1={na.x} y1={na.y} x2={nb.x} y2={nb.y}
+                  strokeWidth={active ? 1.1 : 0.55}
+                  animate={{ stroke: done ? 'rgba(15,155,116,0.3)' : active ? 'rgba(103,232,249,0.6)' : 'rgba(255,255,255,0.09)' }}
+                  transition={{ duration: 0.2 }}
+                />
+              )
+            })}
+
+            {/* Traveling packet */}
+            {!done && step < AUTH_FLOW.length && (
+              <motion.g key={step} filter="url(#pglow)">
+                <motion.circle r={4.5} fill="rgba(103,232,249,0.25)"
+                  cx={AUTH_NODES[curFlow.from].x} cy={AUTH_NODES[curFlow.from].y}
+                  animate={{ cx: AUTH_NODES[curFlow.to].x, cy: AUTH_NODES[curFlow.to].y }}
+                  transition={{ duration: PACKET_MS / 1000 * 0.82, ease: 'easeInOut' }} />
+                <motion.circle r={2.2} fill="#67e8f9"
+                  cx={AUTH_NODES[curFlow.from].x} cy={AUTH_NODES[curFlow.from].y}
+                  animate={{ cx: AUTH_NODES[curFlow.to].x, cy: AUTH_NODES[curFlow.to].y }}
+                  transition={{ duration: PACKET_MS / 1000 * 0.82, ease: 'easeInOut' }} />
+              </motion.g>
+            )}
+
+            {/* Nodes */}
+            {AUTH_NODES.map((n, i) => {
+              const lit = litNodes.includes(i)
+              return (
+                <g key={i}>
+                  {lit && (
+                    <motion.circle cx={n.x} cy={n.y} r={7} fill="none"
+                      stroke={done ? 'rgba(15,155,116,0.25)' : 'rgba(103,232,249,0.2)'} strokeWidth={0.8}
+                      animate={{ r: [5, 10, 5], opacity: [0.6, 0, 0.6] }}
+                      transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }} />
+                  )}
+                  <motion.circle cx={n.x} cy={n.y} r={5} strokeWidth={1.2}
+                    animate={{
+                      fill: done ? 'rgba(15,155,116,0.25)' : lit ? 'rgba(103,232,249,0.15)' : 'rgba(255,255,255,0.04)',
+                      stroke: done ? '#0f9b74' : lit ? '#67e8f9' : 'rgba(255,255,255,0.14)',
+                    }} transition={{ duration: 0.3 }} />
+                  <motion.circle cx={n.x} cy={n.y} r={2}
+                    animate={{ fill: done ? '#0f9b74' : lit ? '#67e8f9' : 'rgba(255,255,255,0.18)' }}
+                    transition={{ duration: 0.3 }} />
+                  <text x={n.x} y={n.y + n.dy} textAnchor="middle"
+                    fontSize="6.2" fontFamily="monospace"
+                    fill={done ? 'rgba(15,155,116,0.7)' : lit ? 'rgba(103,232,249,0.7)' : 'rgba(148,163,184,0.4)'}>
+                    {n.label}
+                  </text>
+                </g>
+              )
+            })}
+          </svg>
         </div>
 
-        {/* JWT token string */}
-        <div className="bg-white/[0.03] border border-white/[0.06] rounded-lg px-2.5 py-2">
-          <div className="text-[6.5px] text-slate-600 font-mono mb-1 tracking-wider">ACCESS TOKEN</div>
-          <div className="font-mono text-[7px] leading-relaxed break-all">
-            <span className="text-[#fb923c]">eyJhbGciOiJSUzI1NiJ9</span>
-            <span className="text-slate-600">.</span>
-            <span className="text-[#06b6d4]">eyJzdWIiOiJ1c3JfYUJjMTIzIn0</span>
-            <span className="text-slate-600">.</span>
-            <span className="text-[#a78bfa]">mT4kXr…9Qw</span>
+        {/* Current step label */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <motion.div className="w-1 h-1 rounded-full"
+              animate={{ background: accent, opacity: !done ? [1, 0.3, 1] : 1 }}
+              transition={{ duration: 0.5, repeat: !done ? Infinity : 0 }} />
+            <AnimatePresence mode="wait">
+              <motion.span key={done ? 'done' : step} className="text-[7px] font-mono"
+                style={{ color: accent }}
+                initial={{ opacity: 0, x: -4 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 4 }}
+                transition={{ duration: 0.14 }}>
+                {done ? 'authenticated' : curFlow.msg}
+              </motion.span>
+            </AnimatePresence>
           </div>
-        </div>
-
-        {/* Claims */}
-        <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg overflow-hidden">
-          {[
-            { key: 'sub',   val: 'usr_aBc123',    color: '#34d399' },
-            { key: 'iss',   val: 'parallax.app',  color: '#06b6d4' },
-            { key: 'exp',   val: 'in 2h 14m',     color: '#fbbf24' },
-            { key: 'scope', val: 'read write admin', color: '#a78bfa' },
-          ].map((c, i) => (
-            <div key={c.key} className="flex items-center gap-2 px-2.5 py-1.5 border-b border-white/[0.04] last:border-0">
-              <span className="text-[7px] font-mono text-slate-600 w-8 flex-shrink-0">{c.key}</span>
-              <span className="text-[7.5px] font-mono flex-1 truncate" style={{ color: c.color }}>{c.val}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* TOTP */}
-        <div className="border-t border-white/[0.05] pt-2.5">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[7px] font-semibold tracking-widest uppercase text-slate-600">TOTP · 2FA</span>
-            <span className="text-[7px] font-mono" style={{ color: progressColor }}>{seconds}s</span>
-          </div>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={codeIdx}
-              initial={{ opacity: 0, y: -6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.2 }}
-              className="text-center font-mono text-[18px] font-bold tracking-[0.25em] text-white mb-2"
-            >
-              {TOTP_CODES[codeIdx]}
-            </motion.div>
-          </AnimatePresence>
-          <div className="h-[3px] rounded-full bg-white/[0.06] overflow-hidden">
-            <motion.div
-              className="h-full rounded-full"
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.06, ease: 'linear' }}
-              style={{ background: progressColor }}
-            />
-          </div>
+          <span className="text-[6px] font-mono text-slate-700">{Math.min(step, AUTH_FLOW.length)}/{AUTH_FLOW.length}</span>
         </div>
 
       </div>
@@ -203,9 +238,9 @@ function EmailWidget() {
 
 function PaymentsWidget() {
   const txns = [
-    { label: 'Acme Corp — Pro',  amount: '+$299',   color: '#34d399', ago: 'just now' },
-    { label: 'BuildCo — Ent.',   amount: '+$1,200', color: '#34d399', ago: '4m' },
-    { label: 'Refund issued',    amount: '−$99',    color: '#f87171', ago: '12m' },
+    { label: 'NovaWorks — Pro', amount: '+$299',   color: '#34d399', ago: 'just now' },
+    { label: 'BuildCo — Ent.',  amount: '+$1,200', color: '#34d399', ago: '4m' },
+    { label: 'Refund issued',   amount: '−$99',    color: '#f87171', ago: '12m' },
   ]
   return (
     <WCard label="Payments" dot="#34d399">
@@ -251,6 +286,7 @@ function APIWidget() {
     { method: 'GET',  path: '/api/analytics', ms: 61,  status: 200 },
   ]
   const methodColor = { GET: '#34d399', POST: '#06b6d4', PUT: '#fbbf24', DELETE: '#f87171' }
+
   return (
     <WCard label="API Gateway" dot="#06b6d4">
       <div>
@@ -272,60 +308,16 @@ function APIWidget() {
   )
 }
 
-// Real-coordinate world map paths. Equirectangular: x = lon+180, y = 90-lat, viewBox 0 0 360 180
-const WORLD_LAND_PATHS = [
-  // North America: Alaska → Arctic coast → Hudson Bay dip → Labrador → Atlantic coast → Gulf → Pacific coast
-  "M12,36 L14,26 L22,19 L40,20 L60,17 L80,15 L95,17 L88,28 L85,32 L92,36 L100,32 L115,30 L127,43 L120,46 L115,46 L104,55 L100,65 L91,61 L84,64 L89,71 L93,69 L95,75 L100,81 L93,78 L91,76 L89,75 L83,71 L70,67 L63,57 L56,46 L56,41 L46,32 L32,30 L28,32 L17,35 Z",
-  // Greenland: SW tip → SE cape → E coast → NE point → N → NW coast → W coast
-  "M126,23 L129,26 L132,29 L138,30 L158,22 L163,14 L155,7 L145,6 L128,11 L126,17 Z",
-  // Iceland
-  "M156,26 L162,26 L167,25 L167,24 L159,24 Z",
-  // Great Britain
-  "M174,40 L181,39 L181,37 L179,32 L175,32 L174,38 Z",
-  // Ireland
-  "M172,38 L174,37 L173,35 L171,36 Z",
-  // Cuba + Hispaniola
-  "M98,73 L108,71 L113,73 L112,75 L101,75 Z M119,79 L123,78 L125,80 L121,81 Z",
-  // South America: Caribbean N coast → NE bulge → E coast → Tierra del Fuego → W coast → Ecuador → Colombia
-  "M112,79 L117,80 L119,80 L145,95 L145,99 L141,104 L137,113 L134,114 L127,124 L122,125 L115,136 L117,145 L113,145 L110,144 L108,136 L108,120 L100,95 L100,90 L103,82 L105,80 Z",
-  // Europe: Iberian → Med coast → Italy boot → Greece → Balkans → Russia/Finland → Scandinavia → Atlantic coast
-  "M171,53 L175,54 L180,53 L183,47 L189,46 L191,48 L194,49 L196,52 L198,50 L200,50 L202,53 L203,49 L208,44 L212,43 L212,22 L205,19 L185,28 L187,32 L190,33 L184,37 L181,39 L178,43 L178,46 L172,46 L171,48 L171,51 Z",
-  // Africa: N coast → Horn of Africa → E coast → Cape → W coast → Guinea → Morocco
-  "M174,54 L189,53 L193,57 L205,59 L212,62 L231,78 L221,92 L220,100 L215,112 L213,124 L198,125 L195,120 L192,108 L192,97 L189,95 L182,85 L179,85 L175,85 L166,80 L163,75 L167,62 Z",
-  // Madagascar
-  "M229,102 L230,103 L230,112 L224,115 L224,108 L226,103 Z",
-  // Asia: Bosphorus → Arabian peninsula → Indian subcontinent → Indochina → China → Siberian Arctic coast
-  "M208,49 L212,53 L215,56 L215,59 L212,62 L218,68 L225,78 L235,68 L237,65 L243,65 L248,67 L252,70 L256,82 L260,82 L260,70 L270,68 L276,74 L279,80 L280,86 L284,89 L289,79 L289,70 L301,68 L302,59 L302,55 L308,55 L309,52 L312,47 L320,44 L332,40 L343,39 L343,30 L350,27 L340,18 L320,17 L300,17 L280,17 L260,17 L240,18 L220,22 L212,22 L212,43 L210,44 L208,44 L208,48 Z",
-  // Japan (Honshu/Kyushu/Shikoku)
-  "M316,54 L319,49 L324,47 L327,51 L324,57 L318,57 Z",
-  // Hokkaido
-  "M320,45 L327,44 L330,47 L326,49 L320,48 Z",
-  // Taiwan
-  "M301,72 L304,69 L305,75 L302,78 Z",
-  // Sri Lanka
-  "M253,103 L256,101 L258,106 L255,108 Z",
-  // Sumatra
-  "M275,85 L276,87 L283,89 L286,93 L286,96 L276,94 L275,88 Z",
-  // Borneo
-  "M290,84 L296,83 L299,86 L298,91 L296,94 L292,94 L289,91 L289,87 Z",
-  // New Guinea
-  "M311,92 L324,96 L327,98 L321,99 L311,96 Z",
-  // Australia: NW coast → Darwin → Cape York → Brisbane → Melbourne → Adelaide → Perth
-  "M294,112 L311,102 L325,100 L333,118 L325,128 L312,126 L295,122 L294,116 Z",
-  // New Zealand North Island
-  "M330,118 L334,114 L335,121 L331,124 Z",
-  // New Zealand South Island
-  "M325,124 L330,120 L333,130 L324,134 Z",
-]
-
-// City dot positions in the same 360×180 coordinate space
+// Rough continental hub positions — no geographic precision needed
+// x = (lon+180)/360*390 · y = (83-lat)/138*215  (map top=83°N, bottom=55°S)
 const ANALYTICS_CITIES = [
-  { name: 'New York',  x: 106, y: 49,  users: '2.4K', flip: false },
-  { name: 'London',    x: 180, y: 38,  users: '1.8K', flip: false },
-  { name: 'Tokyo',     x: 320, y: 54,  users: '1.5K', flip: true  },
-  { name: 'São Paulo', x: 133, y: 114, users: '980',  flip: false },
-  { name: 'Singapore', x: 284, y: 89,  users: '870',  flip: true  },
-  { name: 'Sydney',    x: 331, y: 124, users: '640',  flip: true  },
+  { name: 'Los Angeles', x: 62,  y: 93,  users: '1.9K', flip: false },
+  { name: 'New York',    x: 110, y: 86,  users: '2.4K', flip: false },
+  { name: 'Rio de Janeiro', x: 140, y: 154, users: '890',  flip: false },
+  { name: 'Amsterdam',   x: 190, y: 72,  users: '1.6K', flip: false },
+  { name: 'Cape Town',   x: 205, y: 165, users: '710',  flip: false },
+  { name: 'Tokyo',       x: 329, y: 94,  users: '1.5K', flip: true  },
+  { name: 'Sydney',      x: 340, y: 170, users: '640',  flip: true  },
 ]
 
 function AnalyticsWidget() {
@@ -337,41 +329,36 @@ function AnalyticsWidget() {
   }, [])
 
   const city = ANALYTICS_CITIES[activeCity]
-  const lx = city.flip ? city.x - 58 : city.x + 4
-  const tx = city.flip ? city.x - 55 : city.x + 7
+  const lx = city.flip ? city.x - 78 : city.x + 4
+  const tx = city.flip ? city.x - 75 : city.x + 7
 
   return (
-    <WCard label="Analytics" dot="#fb923c" width={316}>
-      <div className="px-3.5 py-3">
+    <WCard label="Analytics" dot="#fb923c" width={390}>
+      <div className="grid grid-cols-4 h-8 divide-x divide-white/[0.05] border-b border-white/[0.05]">
+        {[
+          { label: 'Sessions',  value: '24.8K',  color: '#0f9b74' },
+          { label: 'Bounce',    value: '32.4%',  color: '#67e8f9' },
+          { label: 'Conv rate', value: '4.2%',   color: '#a78bfa' },
+          { label: 'Avg. time', value: '2m 18s', color: '#fb923c' },
+        ].map(s => (
+          <div key={s.label} className="px-3 flex flex-col justify-center">
+            <div className="text-[6px] text-slate-600 font-mono mb-0.5">{s.label}</div>
+            <div className="text-[10px] font-semibold font-mono" style={{ color: s.color }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-1.5 mb-2.5">
-          {[
-            { label: 'Visitors', value: '12.4K', color: '#0f9b74' },
-            { label: 'Conv.',    value: '3.8%',  color: '#a78bfa' },
-            { label: 'Bounce',   value: '32%',   color: '#fb923c' },
-          ].map(s => (
-            <div key={s.label} className="bg-white/[0.03] border border-white/[0.06] rounded-lg p-1.5 text-center">
-              <div className="text-[7px] text-slate-600 mb-0.5">{s.label}</div>
-              <div className="text-[10px] font-bold" style={{ color: s.color }}>{s.value}</div>
-            </div>
-          ))}
-        </div>
+      <div className="overflow-hidden" style={{ height: 162, background: '#000' }}>
+        <svg viewBox="0 0 390 215" width="100%" height="162" preserveAspectRatio="xMidYMid meet"
+          style={{ display: 'block' }}>
+          <defs>
+            <mask id="worldMapLandMask" maskUnits="userSpaceOnUse" x="0" y="0" width="390" height="215">
+              <image href={worldMapCropped} x="0" y="0" width="390" height="215" preserveAspectRatio="none" />
+            </mask>
+          </defs>
+          <g transform="translate(0 6)">
+            <rect x="0" y="0" width="390" height="215" fill="#0f9b74" mask="url(#worldMapLandMask)" opacity="0.82" />
 
-        {/* World map — real equirectangular paths, viewBox 0 0 360 180 */}
-        <div className="rounded-lg overflow-hidden mb-2.5" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-          <svg viewBox="0 0 360 180" width="100%" height="130" preserveAspectRatio="xMidYMid meet"
-            style={{ background: 'rgba(4,6,12,0.6)', display: 'block' }}>
-            {/* Graticule */}
-            <g stroke="rgba(255,255,255,0.035)" strokeWidth="0.4" fill="none">
-              {[30, 60, 90, 120, 150].map(y => <line key={y} x1="0" y1={y} x2="360" y2={y} />)}
-              {[60, 120, 180, 240, 300].map(x => <line key={x} x1={x} y1="0" x2={x} y2="180" />)}
-            </g>
-            {/* Land masses */}
-            <g fill="rgba(103,232,249,0.13)" stroke="rgba(103,232,249,0.28)" strokeWidth="0.4" strokeLinejoin="round">
-              {WORLD_LAND_PATHS.map((d, i) => <path key={i} d={d} />)}
-            </g>
-            {/* City dots */}
             {ANALYTICS_CITIES.map((c, i) => (
               <g key={c.name}>
                 <motion.circle cx={c.x} cy={c.y} r={4} fill="none" stroke="#67e8f9" strokeWidth="0.7"
@@ -382,35 +369,19 @@ function AnalyticsWidget() {
                   fill={activeCity === i ? '#67e8f9' : 'rgba(103,232,249,0.4)'} />
               </g>
             ))}
-            {/* City tooltip */}
+
             <AnimatePresence mode="wait">
               <motion.g key={city.name} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                <rect x={lx} y={city.y - 12} width={55} height={18} rx={2.5}
+                <rect x={lx} y={city.y - 16} width={74} height={21} rx={2.5}
                   fill="rgba(4,6,12,0.92)" stroke="rgba(103,232,249,0.3)" strokeWidth="0.5" />
-                <text x={tx} y={city.y - 4} fill="#67e8f9" fontSize="6" fontFamily="monospace" fontWeight="600">{city.name}</text>
-                <text x={tx} y={city.y + 4} fill="rgba(148,163,184,0.65)" fontSize="5.5" fontFamily="monospace">{city.users} active</text>
+                <text x={tx} y={city.y - 6} fill="#67e8f9" fontSize="8" fontFamily="monospace" fontWeight="600">{city.name}</text>
+                <text x={tx} y={city.y + 3} fill="rgba(148,163,184,0.65)" fontSize="7" fontFamily="monospace">{city.users} active</text>
               </motion.g>
             </AnimatePresence>
-          </svg>
-        </div>
-
-        {/* Bar chart */}
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-[7px] text-slate-500">7-day traffic</span>
-          <span className="text-[7px] text-[#0f9b74] font-mono">↑ 18%</span>
-        </div>
-        <div className="flex items-end gap-0.5" style={{ height: 24 }}>
-          {[38, 52, 44, 65, 58, 72, 88].map((h, i) => (
-            <div key={i} className="flex-1 rounded-sm"
-              style={{ height: `${h}%`, background: i === 6 ? 'linear-gradient(to top, #0f9b74, #06b6d4)' : 'rgba(255,255,255,0.07)' }} />
-          ))}
-        </div>
-        <div className="flex mt-0.5">
-          {['M','T','W','T','F','S','S'].map((d, i) => (
-            <span key={i} className="text-[5.5px] text-slate-700 flex-1 text-center">{d}</span>
-          ))}
-        </div>
+          </g>
+        </svg>
       </div>
+
     </WCard>
   )
 }
@@ -452,13 +423,9 @@ function AIWidget() {
   if (stage >= 9) visibleMessages.push(AI_MESSAGES[5])
 
   return (
-    <WCard label="AI Copilot" dot="#a78bfa" width={264}>
+    <WCard label="AI Agent" dot="#a78bfa">
       <div className="px-3.5 py-3">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[7.5px] text-slate-600 font-mono">claude-3-opus</span>
-          <span className="text-[7px] px-1.5 py-0.5 rounded-full bg-[#a78bfa]/12 text-[#a78bfa] border border-[#a78bfa]/20">Active</span>
-        </div>
-        <div className="flex flex-col gap-2" style={{ height: 178, overflow: 'hidden' }}>
+        <div className="flex flex-col gap-2" style={{ height: 190, overflow: 'hidden' }}>
           <>
             {visibleMessages.map((msg, i) => msg.role === 'user' ? (
               <div
@@ -746,14 +713,14 @@ function DatabaseWidget() {
 // All widgets stay visible at once. Side columns carry 8 widgets and the lower
 // center band carries 2 widgets, keeping the hero copy area clear.
 const STATIC_WIDGET_LAYOUTS = [
-  { left: '44px', top: '18%', scale: 0.72 },
-  { left: '150px', top: '37%', scale: 0.71 },
-  { left: '58px', top: '56%', scale: 0.73 },
-  { left: 'calc(50% - 240px)', top: '56%', scale: 0.88 },
-  { right: '52px', top: '19%', scale: 0.72 },
-  { right: '250px', top: '36%', scale: 0.71 },
-  { right: '64px', top: '58%', scale: 0.92 },
-  { right: '300px', top: '60%', scale: 0.92 },
+  { right: '234px', top: '36%', scale: 0.71 },
+  { left: '134px', top: '37%', scale: 0.71 },
+  { left: '36px', top: '19%', scale: 0.72 },
+  { left: '48px', top: '58%', scale: 0.92 },
+  { right: '36px', top: '19%', scale: 0.72 },
+  { left: '234px', top: '36%', scale: 0.71 },
+  { right: '48px', top: '58%', scale: 0.92 },
+  { right: '316px', top: '60%', scale: 0.92 },
   { left: 'calc(50% - 262px)', top: '64%', scale: 0.75 },
   { left: 'calc(50% + 26px)', top: '73%', scale: 0.74 },
 ]
@@ -776,12 +743,6 @@ function AmbientBg() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="absolute inset-0 bg-[#080d18]" />
-      <div className="absolute rounded-full blur-[160px] animate-glow-pulse-slow"
-        style={{ width:700, height:700, top:'-20%', left:'0%', background:'radial-gradient(circle, rgba(15,155,116,0.22), transparent 70%)' }}/>
-      <div className="absolute rounded-full blur-[130px] animate-glow-pulse-slow"
-        style={{ width:600, height:600, bottom:'-10%', right:'-5%', background:'radial-gradient(circle, rgba(139,92,246,0.20), transparent 70%)', animationDelay:'2.5s' }}/>
-      <div className="absolute rounded-full blur-[110px] animate-glow-pulse-slow"
-        style={{ width:440, height:440, top:'35%', right:'28%', background:'radial-gradient(circle, rgba(6,182,212,0.16), transparent 70%)', animationDelay:'4s' }}/>
     </div>
   )
 }
