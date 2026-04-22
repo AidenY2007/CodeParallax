@@ -459,43 +459,43 @@ function AIWidget() {
           <span className="text-[7px] px-1.5 py-0.5 rounded-full bg-[#a78bfa]/12 text-[#a78bfa] border border-[#a78bfa]/20">Active</span>
         </div>
         <div className="flex flex-col gap-2" style={{ height: 178, overflow: 'hidden' }}>
-          <AnimatePresence initial={false}>
+          <>
             {visibleMessages.map((msg, i) => msg.role === 'user' ? (
-              <motion.div
+              <div
                 key={`u${i}`}
-                initial={{ opacity: 0, x: 16, scale: 0.94 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ duration: 0.26, ease }}
                 className="flex justify-end flex-shrink-0"
               >
-                <div className="bg-[#0f9b74]/12 border border-[#0f9b74]/20 rounded-xl rounded-tr-sm px-2.5 py-1.5 max-w-[84%]">
-                  <span className="text-[8.5px] text-slate-300">{msg.text}</span>
-                </div>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.18, ease }}
+                  className="bg-[#0f9b74]/12 border border-[#0f9b74]/20 rounded-xl rounded-tr-sm px-2.5 py-1.5 max-w-[84%] min-h-6 flex items-center"
+                >
+                  <span className="text-[8.5px] leading-tight text-slate-300">{msg.text}</span>
+                </motion.div>
+              </div>
             ) : (
-              <motion.div
+              <div
                 key={`a${i}`}
-                initial={{ opacity: 0, x: -16, scale: 0.94 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                transition={{ duration: 0.26, ease }}
                 className="flex gap-2 flex-shrink-0"
               >
                 <div className="w-5 h-5 rounded-full bg-[#a78bfa]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <span className="text-[7px] font-bold text-[#a78bfa]">AI</span>
                 </div>
-                <div className="bg-white/4 border border-white/8 rounded-xl rounded-tl-sm px-2.5 py-1.5 flex-1">
-                  <span className="text-[8.5px] text-slate-300 leading-relaxed">{msg.text}</span>
-                </div>
-              </motion.div>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.18, ease }}
+                  className="bg-white/4 border border-white/8 rounded-xl rounded-tl-sm px-2.5 py-1.5 flex-1 min-h-6 flex items-center"
+                >
+                  <span className="text-[8.5px] leading-tight text-slate-300">{msg.text}</span>
+                </motion.div>
+              </div>
             ))}
 
             {showTyping && (
-              <motion.div
+              <div
                 key="typing"
-                initial={{ opacity: 0, x: -14, scale: 0.94 }}
-                animate={{ opacity: 1, x: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.94 }}
-                transition={{ duration: 0.22, ease }}
                 className="flex gap-2 items-center flex-shrink-0"
               >
                 <div className="w-5 h-5 rounded-full bg-[#a78bfa]/15 flex items-center justify-center flex-shrink-0">
@@ -508,9 +508,9 @@ function AIWidget() {
                       transition={{ duration: 1.1, delay: i * 0.18, repeat: Infinity }} />
                   ))}
                 </div>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </>
         </div>
       </div>
     </WCard>
@@ -653,7 +653,7 @@ function DatabaseWidget() {
         border: '1px solid rgba(255,255,255,0.11)',
         backdropFilter: 'blur(24px)',
         boxShadow: '0 8px 40px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 18px #67e8f955, 0 0 56px #67e8f92e',
-        width: 316,
+        width: 390,
       }}
     >
       {/* Header */}
@@ -747,12 +747,12 @@ function DatabaseWidget() {
 // center band carries 2 widgets, keeping the hero copy area clear.
 const STATIC_WIDGET_LAYOUTS = [
   { left: '44px', top: '18%', scale: 0.72 },
-  { left: '86px', top: '37%', scale: 0.71 },
+  { left: '150px', top: '37%', scale: 0.71 },
   { left: '58px', top: '56%', scale: 0.73 },
-  { left: 'calc(50% - 240px)', top: '72%', scale: 0.88 },
+  { left: 'calc(50% - 240px)', top: '56%', scale: 0.88 },
   { right: '52px', top: '19%', scale: 0.72 },
-  { right: '96px', top: '40%', scale: 0.71 },
-  { right: '64px', top: '59%', scale: 0.73 },
+  { right: '250px', top: '36%', scale: 0.71 },
+  { right: '64px', top: '58%', scale: 0.92 },
   { right: '300px', top: '60%', scale: 0.92 },
   { left: 'calc(50% - 262px)', top: '64%', scale: 0.75 },
   { left: 'calc(50% + 26px)', top: '73%', scale: 0.74 },
@@ -767,8 +767,8 @@ const FLOATS = [
 ]
 
 const WIDGETS = [
-  AuthWidget, PaymentsWidget, AIWidget, AnalyticsWidget,
-  EmailWidget, APIWidget, SMSWidget, DatabaseWidget,
+  AuthWidget, null, AIWidget, AnalyticsWidget,
+  PaymentsWidget, APIWidget, DatabaseWidget,
 ]
 
 // ─── Ambient background ───────────────────────────────────────────────────────
@@ -852,6 +852,8 @@ export default function Hero() {
         {/* Permanent widget layout on desktop widths */}
         <div className="absolute inset-0 z-10 hidden xl:block pointer-events-none">
           {WIDGETS.map((Component, index) => {
+            if (!Component) return null
+
             const float = FLOATS[index % FLOATS.length]
             const layout = STATIC_WIDGET_LAYOUTS[index]
 
