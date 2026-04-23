@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
+import { ArrowDown } from 'lucide-react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ChevronDown } from 'lucide-react'
 import googleLogo from '../assets/google.svg.png'
 import worldMapCropped from '../assets/world-map-cropped.png'
 
@@ -484,38 +484,6 @@ function AIWidget() {
   )
 }
 
-function AutomationWidget() {
-  const steps = [
-    { label: 'New signup',        icon: '⚡', color: '#0f9b74' },
-    { label: 'Filter: plan=pro',  icon: '⊙', color: '#06b6d4' },
-    { label: 'Send welcome email',icon: '✉', color: '#8b5cf6' },
-    { label: 'Slack notify team', icon: '→', color: '#34d399' },
-  ]
-  return (
-    <WCard label="Automation" dot="#06b6d4">
-      <div className="px-3.5 py-2.5 space-y-1">
-        {steps.map((s, i) => (
-          <div key={s.label}>
-            <div className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg bg-white/[0.03] border border-white/[0.05]">
-              <span className="text-[9px] flex-shrink-0" style={{ color: s.color }}>{s.icon}</span>
-              <span className="text-[8.5px] text-slate-300 flex-1">{s.label}</span>
-              <div className="w-1.5 h-1.5 rounded-full animate-pulse flex-shrink-0" style={{ background: s.color }}/>
-            </div>
-            {i < steps.length - 1 && (
-              <div className="flex justify-center my-0.5">
-                <div className="w-px h-2" style={{ background: `${s.color}30` }} />
-              </div>
-            )}
-          </div>
-        ))}
-        <div className="flex items-center justify-between pt-1.5 border-t border-white/[0.05]">
-          <span className="text-[7.5px] text-slate-600">847 runs today</span>
-          <span className="text-[7.5px] text-[#34d399] font-mono">100% success</span>
-        </div>
-      </div>
-    </WCard>
-  )
-}
 
 function SMSWidget() {
   const msgs = [
@@ -799,7 +767,7 @@ export default function Hero() {
   }, [loginOpen])
 
   return (
-    <div ref={containerRef} style={{ height: '220vh' }}>
+    <div ref={containerRef} style={{ height: '160vh' }}>
       <div className="sticky top-0 h-screen overflow-hidden">
 
         {/* Background */}
@@ -846,6 +814,7 @@ export default function Hero() {
               </div>
             )
           })}
+
         </div>
 
         {/* Hero text */}
@@ -914,18 +883,32 @@ export default function Hero() {
                 Crafting next-generation software tailored to the unique operations of our clients.
               </p>
             </motion.div>
+
           </motion.div>
         </motion.div>
 
-        {/* Scroll hint */}
+
+        {/* Explore button */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30"
           style={{ opacity: hintOpacity }}
         >
-          <span className="text-[10px] text-slate-600 tracking-[0.22em] uppercase">Scroll</span>
-          <motion.div animate={{ y:[0,5,0] }} transition={{ duration:1.7, repeat:Infinity, ease:'easeInOut' }}>
-            <ChevronDown className="w-4 h-4 text-slate-600" />
-          </motion.div>
+          <motion.button
+            type="button"
+            onClick={() => window.scrollTo({ top: containerRef.current.offsetHeight, behavior: 'smooth' })}
+            className="flex flex-col items-center gap-1.5 cursor-pointer bg-transparent border-0 outline-none"
+            whileHover={{ y: -2 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+          >
+            <span className="text-[10px] font-semibold tracking-[0.22em] uppercase text-slate-400">Explore</span>
+            <motion.div
+              className="pointer-events-none"
+              animate={{ y: [0, 4, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <ArrowDown className="w-4 h-4 text-slate-400" />
+            </motion.div>
+          </motion.button>
         </motion.div>
 
         {loginOpen && (
