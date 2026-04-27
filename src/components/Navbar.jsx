@@ -76,9 +76,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          <Link to="/pricing" className="text-sm text-slate-500 hover:text-white transition-colors duration-200">
-            Pricing
-          </Link>
           <Link to="/contact" className="text-sm text-slate-500 hover:text-white transition-colors duration-200">
             Contact
           </Link>
@@ -110,7 +107,6 @@ export default function Navbar() {
         <div className="md:hidden bg-[#0c1426] border-t border-white/5 px-6 py-5 space-y-1">
           {[
             { label: 'Home', href: '/' },
-            { label: 'Pricing', href: '/pricing' },
             { label: 'Contact', href: '/contact' },
           ].map(item => (
             <Link

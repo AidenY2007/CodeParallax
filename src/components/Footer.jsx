@@ -17,7 +17,6 @@ const nav = {
   ],
   Company: [
     { label: 'Home',    href: '/' },
-    { label: 'Pricing', href: '/pricing' },
     { label: 'Contact', href: '/contact' },
   ],
   Account: [

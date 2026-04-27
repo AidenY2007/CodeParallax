@@ -74,7 +74,7 @@ export default function FinalCTA() {
               initial={{ opacity: 0, y: 10 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.25 }}
-              className="flex flex-col sm:flex-row gap-3 justify-center"
+              className="flex justify-center"
             >
               <Link
                 to="/contact"
@@ -83,12 +83,6 @@ export default function FinalCTA() {
               >
                 Start a project
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
-              <Link
-                to="/pricing"
-                className="flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/8 text-slate-300 hover:text-white text-sm font-bold rounded-2xl border border-white/8 hover:border-white/15 transition-all duration-200"
-              >
-                View pricing
               </Link>
             </motion.div>
           </div>

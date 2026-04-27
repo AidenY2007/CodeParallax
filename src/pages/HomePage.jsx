@@ -3,8 +3,7 @@ import CapabilityGrid from '../sections/CapabilityGrid'
 import FeatureSections from '../sections/FeatureSections'
 import WhyParallax from '../sections/WhyParallax'
 import Process from '../sections/Process'
-import PricingPreview from '../sections/PricingPreview'
-import FinalCTA from '../sections/FinalCTA'
+import RecentProjects from '../sections/RecentProjects'
 
 export default function HomePage() {
   return (
@@ -12,10 +11,9 @@ export default function HomePage() {
       <Hero />
       <CapabilityGrid />
       <FeatureSections />
-      <WhyParallax />
       <Process />
-      <PricingPreview />
-      <FinalCTA />
+      <WhyParallax />
+      <RecentProjects />
     </>
   )
 }
