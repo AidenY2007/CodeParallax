@@ -1,9 +1,11 @@
 import { useRef, useEffect, useState } from 'react'
-import { ArrowDown } from 'lucide-react'
+import { createPortal } from 'react-dom'
+import { ArrowDown, X } from 'lucide-react'
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import googleLogo from '../assets/google.svg.png'
 import worldMapCropped from '../assets/world-map-cropped.png'
+import { useAuth } from '../context/AuthContext'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
@@ -724,6 +726,9 @@ const entrance = {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Hero() {
   const containerRef = useRef(null)
+  const location = useLocation()
+  const navigate = useNavigate()
+  const { signUp, logIn, signInWithGoogle, isAdmin } = useAuth()
 
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] })
   const contentOpacity = useTransform(scrollYProgress, [0, 0.38], [1, 0])
@@ -737,6 +742,83 @@ export default function Hero() {
   const [typedWord, setTypedWord] = useState('')
   const [deleting, setDeleting]   = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [signupOpen, setSignupOpen] = useState(false)
+
+  // Form state
+  const [loginEmail, setLoginEmail] = useState('')
+  const [loginPassword, setLoginPassword] = useState('')
+  const [loginError, setLoginError] = useState('')
+  const [loginLoading, setLoginLoading] = useState(false)
+
+  const [signupFirstName, setSignupFirstName] = useState('')
+  const [signupLastName, setSignupLastName] = useState('')
+  const [signupEmail, setSignupEmail] = useState('')
+  const [signupPassword, setSignupPassword] = useState('')
+  const [signupError, setSignupError] = useState('')
+  const [signupLoading, setSignupLoading] = useState(false)
+
+  function dashboardPath(email) {
+    return email === 'aidenyasharian@gmail.com' ? '/admin/dashboard' : '/dashboard'
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault()
+    setLoginError('')
+    setLoginLoading(true)
+    try {
+      const cred = await logIn(loginEmail, loginPassword)
+      setLoginOpen(false)
+      navigate(dashboardPath(cred.user?.email))
+    } catch (err) {
+      setLoginError(friendlyError(err.code))
+    } finally {
+      setLoginLoading(false)
+    }
+  }
+
+  async function handleSignup(e) {
+    e.preventDefault()
+    setSignupError('')
+    setSignupLoading(true)
+    try {
+      const user = await signUp(signupEmail, signupPassword, signupFirstName, signupLastName)
+      setSignupOpen(false)
+      navigate(dashboardPath(user?.email))
+    } catch (err) {
+      setSignupError(friendlyError(err.code))
+    } finally {
+      setSignupLoading(false)
+    }
+  }
+
+  async function handleGoogle(modal) {
+    try {
+      const user = await signInWithGoogle()
+      if (modal === 'login') setLoginOpen(false)
+      else setSignupOpen(false)
+      navigate(dashboardPath(user?.email))
+    } catch (err) {
+      if (modal === 'login') setLoginError(friendlyError(err.code))
+      else setSignupError(friendlyError(err.code))
+    }
+  }
+
+  function friendlyError(code) {
+    const map = {
+      'auth/user-not-found':       'No account found with that email.',
+      'auth/wrong-password':       'Incorrect password.',
+      'auth/invalid-credential':   'Invalid email or password.',
+      'auth/email-already-in-use': 'An account with this email already exists.',
+      'auth/weak-password':        'Password must be at least 6 characters.',
+      'auth/invalid-email':        'Please enter a valid email address.',
+      'auth/operation-not-allowed':'Email/password sign-in is not enabled for this Firebase project.',
+      'auth/network-request-failed':'Network error. Please check your connection and try again.',
+      'permission-denied':         'Your account was created, but profile setup is blocked by database permissions.',
+      'app/signup-profile-sync-failed': 'We could not save your account details. Please try again.',
+      'auth/popup-closed-by-user': 'Google sign-in was cancelled.',
+    }
+    return map[code] ?? 'Something went wrong. Please try again.'
+  }
 
   useEffect(() => {
     const target = WORDS[wordIndex]
@@ -754,6 +836,35 @@ export default function Hero() {
   }, [typedWord, wordIndex, deleting])
 
   useEffect(() => {
+    if (!signupOpen) return undefined
+    const onKeyDown = (event) => { if (event.key === 'Escape') setSignupOpen(false) }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [signupOpen])
+
+  useEffect(() => {
+    const handler = () => setSignupOpen(true)
+    window.addEventListener('open-signup', handler)
+    return () => window.removeEventListener('open-signup', handler)
+  }, [])
+
+  useEffect(() => {
+    const handler = () => setLoginOpen(true)
+    window.addEventListener('open-login', handler)
+    return () => window.removeEventListener('open-login', handler)
+  }, [])
+
+  useEffect(() => {
+    const modal = location.state?.authModal
+    if (!modal) return
+
+    if (modal === 'login') setLoginOpen(true)
+    if (modal === 'signup') setSignupOpen(true)
+
+    navigate(location.pathname, { replace: true, state: {} })
+  }, [location.pathname, location.state, navigate])
+
+  useEffect(() => {
     if (!loginOpen) return undefined
 
     const onKeyDown = (event) => {
@@ -766,9 +877,227 @@ export default function Hero() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [loginOpen])
 
+  const loginModal = typeof document !== 'undefined' && loginOpen
+    ? createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center px-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="hero-login-title"
+          onClick={() => setLoginOpen(false)}
+        >
+          <div className="absolute inset-0 bg-[#050912]/80 backdrop-blur-sm" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
+            transition={{ duration: 0.22, ease: [0.21, 0.47, 0.32, 0.98] }}
+            onClick={(event) => event.stopPropagation()}
+            className="relative w-full max-w-md rounded-[28px] border border-white/10 bg-[#0b1120]/96 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
+          >
+            <button
+              type="button"
+              aria-label="Close login dialog"
+              onClick={() => setLoginOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="mb-6">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Client Access</p>
+              <h2 id="hero-login-title" className="text-2xl font-bold text-white">
+                Log in to Parallax
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Enter your credentials or continue with Google.
+              </p>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleLogin}>
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-200">Email</span>
+                <input
+                  type="email"
+                  required
+                  value={loginEmail}
+                  onChange={e => setLoginEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-200">Password</span>
+                <input
+                  type="password"
+                  required
+                  value={loginPassword}
+                  onChange={e => setLoginPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                />
+              </label>
+
+              {loginError && (
+                <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-3 py-2">{loginError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ background: AURORA, boxShadow: '0 10px 28px rgba(15,155,116,0.2)' }}
+              >
+                {loginLoading ? 'Logging in…' : 'Log in'}
+              </button>
+            </form>
+
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-white/8" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">or</span>
+              <div className="h-px flex-1 bg-white/8" />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleGoogle('login')}
+              className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-white/[0.07]"
+            >
+              <img src={googleLogo} alt="" className="h-5 w-5 object-contain" />
+              Log in with Google
+            </button>
+          </motion.div>
+        </div>,
+        document.body,
+      )
+    : null
+
+  const signupModal = typeof document !== 'undefined' && signupOpen
+    ? createPortal(
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center px-6"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="hero-signup-title"
+          onClick={() => setSignupOpen(false)}
+        >
+          <div className="absolute inset-0 bg-[#050912]/80 backdrop-blur-sm" />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98, y: 8 }}
+            transition={{ duration: 0.22, ease: [0.21, 0.47, 0.32, 0.98] }}
+            onClick={(event) => event.stopPropagation()}
+            className="relative w-full max-w-md rounded-[28px] border border-white/10 bg-[#0b1120]/96 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
+          >
+            <button
+              type="button"
+              aria-label="Close signup dialog"
+              onClick={() => setSignupOpen(false)}
+              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="mb-6">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Get Started</p>
+              <h2 id="hero-signup-title" className="text-2xl font-bold text-white">
+                Create your account
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Sign up with your email or continue with Google.
+              </p>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleSignup}>
+              <div className="flex gap-3">
+                <label className="block flex-1">
+                  <span className="mb-2 block text-sm font-medium text-slate-200">First name</span>
+                  <input
+                    type="text"
+                    required
+                    value={signupFirstName}
+                    onChange={e => setSignupFirstName(e.target.value)}
+                    placeholder="First"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                  />
+                </label>
+                <label className="block flex-1">
+                  <span className="mb-2 block text-sm font-medium text-slate-200">Last name</span>
+                  <input
+                    type="text"
+                    required
+                    value={signupLastName}
+                    onChange={e => setSignupLastName(e.target.value)}
+                    placeholder="Last"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                  />
+                </label>
+              </div>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-200">Email</span>
+                <input
+                  type="email"
+                  required
+                  value={signupEmail}
+                  onChange={e => setSignupEmail(e.target.value)}
+                  placeholder="you@company.com"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-2 block text-sm font-medium text-slate-200">Password</span>
+                <input
+                  type="password"
+                  required
+                  value={signupPassword}
+                  onChange={e => setSignupPassword(e.target.value)}
+                  placeholder="Minimum 8 characters"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
+                />
+              </label>
+
+              {signupError && (
+                <p className="text-xs text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-3 py-2">{signupError}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={signupLoading}
+                className="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ background: AURORA, boxShadow: '0 10px 28px rgba(15,155,116,0.2)' }}
+              >
+                {signupLoading ? 'Creating account…' : 'Create account'}
+              </button>
+            </form>
+
+            <div className="my-4 flex items-center gap-3">
+              <div className="h-px flex-1 bg-white/8" />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">or</span>
+              <div className="h-px flex-1 bg-white/8" />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => handleGoogle('signup')}
+              className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-white/[0.07]"
+            >
+              <img src={googleLogo} alt="" className="h-5 w-5 object-contain" />
+              Sign up with Google
+            </button>
+          </motion.div>
+        </div>,
+        document.body,
+      )
+    : null
+
   return (
-    <div ref={containerRef} style={{ height: '160vh' }}>
-      <div className="sticky top-0 h-screen overflow-hidden">
+    <>
+      <div id="home-hero" ref={containerRef} style={{ height: '135vh' }}>
+        <div className="sticky top-0 h-screen overflow-hidden">
 
         {/* Background */}
         <motion.div className="absolute inset-0" style={{ scale: bgScale }}>
@@ -859,13 +1188,13 @@ export default function Hero() {
             </motion.div>
 
             <motion.div variants={entrance.item} className="flex items-center justify-center gap-2">
-              <Link
-                to="/contact"
-                className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
-                style={{ background: AURORA, boxShadow: '0 8px 24px rgba(15,155,116,0.22)' }}
+              <button
+                type="button"
+                onClick={() => setSignupOpen(true)}
+                className="inline-flex items-center justify-center rounded-xl border border-white/12 bg-white/[0.05] px-5 py-2.5 text-sm font-semibold text-slate-200 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white"
               >
-                Contact
-              </Link>
+                Sign up
+              </button>
               <button
                 type="button"
                 onClick={() => setLoginOpen(true)}
@@ -882,6 +1211,16 @@ export default function Hero() {
               >
                 Crafting next-generation software tailored to the unique operations of our clients.
               </p>
+            </motion.div>
+
+            <motion.div variants={entrance.item}>
+              <Link
+                to="/contact"
+                className="inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
+                style={{ background: AURORA, boxShadow: '0 8px 24px rgba(15,155,116,0.22)' }}
+              >
+                Contact
+              </Link>
             </motion.div>
 
           </motion.div>
@@ -911,90 +1250,10 @@ export default function Hero() {
           </motion.button>
         </motion.div>
 
-        {loginOpen && (
-          <div
-            className="absolute inset-0 z-50 flex items-center justify-center px-6"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="hero-login-title"
-            onClick={() => setLoginOpen(false)}
-          >
-            <div className="absolute inset-0 bg-[#050912]/80 backdrop-blur-sm" />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 8 }}
-              transition={{ duration: 0.22, ease: [0.21, 0.47, 0.32, 0.98] }}
-              onClick={(event) => event.stopPropagation()}
-              className="relative w-full max-w-md rounded-[28px] border border-white/10 bg-[#0b1120]/96 p-6 shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
-            >
-              <button
-                type="button"
-                aria-label="Close login dialog"
-                onClick={() => setLoginOpen(false)}
-                className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-slate-300 transition-colors duration-200 hover:bg-white/[0.08] hover:text-white"
-              >
-                ×
-              </button>
-
-              <div className="mb-6">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">Client Access</p>
-                <h2 id="hero-login-title" className="text-2xl font-bold text-white">
-                  Log in to Parallax
-                </h2>
-                <p className="mt-2 text-sm leading-6 text-slate-400">
-                  Enter your credentials or continue with Google.
-                </p>
-              </div>
-
-              <form className="space-y-4" onSubmit={(event) => event.preventDefault()}>
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-200">Email</span>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="you@company.com"
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-200">Password</span>
-                  <input
-                    type="password"
-                    name="password"
-                    placeholder="Enter your password"
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white outline-none transition-colors duration-200 placeholder:text-slate-500 focus:border-cyan-400/60 focus:bg-white/[0.06]"
-                  />
-                </label>
-
-                <button
-                  type="submit"
-                  className="inline-flex w-full items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-transform duration-200 hover:-translate-y-0.5"
-                  style={{ background: AURORA, boxShadow: '0 10px 28px rgba(15,155,116,0.2)' }}
-                >
-                  Log in
-                </button>
-              </form>
-
-              <div className="my-4 flex items-center gap-3">
-                <div className="h-px flex-1 bg-white/8" />
-                <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">or</span>
-                <div className="h-px flex-1 bg-white/8" />
-              </div>
-
-              <button
-                type="button"
-                className="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-white/[0.07]"
-              >
-                <img src={googleLogo} alt="" className="h-5 w-5 object-contain" />
-                Sign in with Google
-              </button>
-            </motion.div>
-          </div>
-        )}
-
+        </div>
       </div>
-    </div>
+      {loginModal}
+      {signupModal}
+    </>
   )
 }

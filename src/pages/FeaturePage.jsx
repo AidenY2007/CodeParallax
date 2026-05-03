@@ -2,6 +2,7 @@ import { useParams, Link, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react'
 import { getFeatureBySlug, FEATURES } from '../data/features'
+import { useStartProject } from '../hooks/useStartProject'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
@@ -28,6 +29,7 @@ export default function FeaturePage() {
 
   const { Icon, title, tagline, description, color, features, approach, useCases } = feature
 
+  const startProject = useStartProject()
   const currentIndex = FEATURES.findIndex(f => f.slug === slug)
   const prev = FEATURES[currentIndex - 1] ?? null
   const next = FEATURES[currentIndex + 1] ?? null
@@ -80,14 +82,14 @@ export default function FeaturePage() {
 
           <FadeUp delay={0.18}>
             <div className="flex flex-wrap gap-3 mt-10">
-              <Link
-                to="/contact"
+              <button
+                onClick={startProject}
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
                 style={{ background: AURORA, boxShadow: '0 8px 24px rgba(15,155,116,0.22)' }}
               >
                 Start a project
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
             </div>
           </FadeUp>
         </div>

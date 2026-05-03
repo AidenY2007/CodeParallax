@@ -1,13 +1,14 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import { useStartProject } from '../hooks/useStartProject'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
 export default function FinalCTA() {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
+  const startProject = useStartProject()
 
   return (
     <section className="py-28 px-6">
@@ -76,14 +77,14 @@ export default function FinalCTA() {
               transition={{ duration: 0.6, delay: 0.25 }}
               className="flex justify-center"
             >
-              <Link
-                to="/contact"
+              <button
+                onClick={startProject}
                 className="group flex items-center justify-center gap-2 px-8 py-4 text-white text-sm font-bold rounded-2xl transition-all duration-200 hover:-translate-y-0.5"
                 style={{ background: AURORA, boxShadow: '0 4px 28px rgba(15,155,116,0.30)' }}
               >
                 Start a project
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </Link>
+              </button>
             </motion.div>
           </div>
         </motion.div>

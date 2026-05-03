@@ -21,63 +21,63 @@ const CAPS = [
     title: 'AI Integration',
     description: 'AI-powered assistants, copilots, and intelligent workflows.',
     href: '/features/ai',
-    color: '#a78bfa',
-    glow: 'rgba(167,139,250,0.12)',
-    border: 'rgba(167,139,250,0.25)',
+    color: '#8b5cf6',
+    glow: 'rgba(139,92,246,0.12)',
+    border: 'rgba(139,92,246,0.25)',
   },
   {
     Icon: BarChart2,
     title: 'Website Analytics',
     description: 'Clarity into performance, user behavior, and conversion.',
     href: '/features/analytics',
-    color: '#f59e0b',
-    glow: 'rgba(245,158,11,0.12)',
-    border: 'rgba(245,158,11,0.25)',
+    color: '#facc15',
+    glow: 'rgba(250,204,21,0.12)',
+    border: 'rgba(250,204,21,0.25)',
   },
   {
     Icon: CreditCard,
     title: 'Payments & Fintech',
     description: 'Billing, subscriptions, and payment infrastructure that supports revenue.',
     href: '/features/payments',
-    color: '#34d399',
-    glow: 'rgba(52,211,153,0.12)',
-    border: 'rgba(52,211,153,0.25)',
+    color: '#94a3b8',
+    glow: 'rgba(148,163,184,0.12)',
+    border: 'rgba(148,163,184,0.25)',
   },
   {
     Icon: GitBranch,
     title: 'Automation Workflows',
     description: 'Trigger-based systems that replace manual, repetitive work.',
     href: '/features/automation',
-    color: '#06b6d4',
-    glow: 'rgba(6,182,212,0.12)',
-    border: 'rgba(6,182,212,0.25)',
+    color: '#67e8f9',
+    glow: 'rgba(103,232,249,0.12)',
+    border: 'rgba(103,232,249,0.25)',
   },
   {
     Icon: Lock,
     title: 'Authentication',
     description: 'Secure identity, roles, and session management for real products.',
     href: '/features/authentication',
-    color: '#0f9b74',
-    glow: 'rgba(15,155,116,0.12)',
-    border: 'rgba(15,155,116,0.25)',
+    color: '#ef4444',
+    glow: 'rgba(239,68,68,0.12)',
+    border: 'rgba(239,68,68,0.25)',
   },
   {
     Icon: Layout,
     title: 'UI / Design',
     description: 'Custom interfaces and design systems built to your brand at every touchpoint.',
     href: '/features/ui-design',
-    color: '#8b5cf6',
-    glow: 'rgba(139,92,246,0.12)',
-    border: 'rgba(139,92,246,0.25)',
+    color: '#f472b6',
+    glow: 'rgba(244,114,182,0.12)',
+    border: 'rgba(244,114,182,0.25)',
   },
   {
     Icon: MessageSquare,
     title: 'Communication',
     description: 'Email and SMS systems for lifecycle messaging, alerts, and conversion.',
     href: '/features/communication',
-    color: '#06b6d4',
-    glow: 'rgba(6,182,212,0.12)',
-    border: 'rgba(6,182,212,0.25)',
+    color: '#3b82f6',
+    glow: 'rgba(59,130,246,0.12)',
+    border: 'rgba(59,130,246,0.25)',
   },
   {
     Icon: Server,
@@ -90,12 +90,14 @@ const CAPS = [
   },
 ]
 
+const MotionDiv = motion.div
+
 function CapCard({ cap, index }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-40px' })
 
   return (
-    <motion.div
+    <MotionDiv
       ref={ref}
       initial={{ opacity: 0, y: 18 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -125,7 +127,7 @@ function CapCard({ cap, index }) {
           <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
         </div>
       </Link>
-    </motion.div>
+    </MotionDiv>
   )
 }
 
@@ -134,25 +136,22 @@ export default function CapabilityGrid() {
   const headInView = useInView(headRef, { once: true })
 
   return (
-    <section id="capabilities" className="py-28 px-6">
+    <section id="capabilities" className="pt-14 pb-28 px-6">
       <div className="max-w-7xl mx-auto">
-        <motion.div
+        <MotionDiv
           ref={headRef}
           initial={{ opacity: 0, y: 18 }}
           animate={headInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
-          className="text-center mb-16"
+          className="text-center mb-8"
         >
-          <span className="text-xs font-semibold tracking-[0.2em] uppercase" style={{ color: '#0f9b74' }}>
-            Capabilities
-          </span>
-          <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Nine systems. One platform.
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            One platform. Complete infrastructure.
           </h2>
-          <p className="mt-4 text-slate-400 max-w-md mx-auto leading-relaxed">
+          <p className="mt-2 text-slate-400 max-w-md mx-auto leading-relaxed">
             Everything a modern business needs to operate beyond templates and no-code limitations.
           </p>
-        </motion.div>
+        </MotionDiv>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {CAPS.map((cap, i) => (

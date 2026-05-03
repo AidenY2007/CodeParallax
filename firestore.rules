@@ -10,43 +10,55 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.email == 'aidenyasharian@gmail.com';
+    }
+
+    function isLinkedClient(code) {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)/projects/$(code));
+    }
+
     match /users/{userId} {
-      allow read: if isOwner(userId);
-      allow create, update: if isOwner(userId);
-      allow delete: if false;
+      allow read: if isOwner(userId) || isAdmin();
+      allow create, update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
 
-      match /reflections/{reflectionId} {
-        allow read, create, update, delete: if isOwner(userId);
-      }
-
-      match /notes/{noteId} {
-        allow read, create, update, delete: if isOwner(userId);
-      }
-
-      match /{document=**} {
-        allow read, write: if false;
+      match /projects/{projectId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create, update, delete: if isOwner(userId) || isAdmin();
       }
     }
 
-    match /sessions/{sessionId} {
-      allow create: if isSignedIn() &&
-        request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if isSignedIn() &&
-        resource.data.userId == request.auth.uid;
-
-      match /messages/{messageId} {
-        allow create: if isSignedIn() &&
-          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
-        allow read, update, delete: if isSignedIn() &&
-          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
-      }
+    match /projectCodes/{code} {
+      allow read: if isSignedIn();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() ||
+        (isSignedIn() &&
+          request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['clientName', 'clientUid', 'clientEmail']));
 
       match /notes/{noteId} {
-        allow create: if isSignedIn() &&
-          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
-        allow read, update, delete: if isSignedIn() &&
-          get(/databases/$(database)/documents/sessions/$(sessionId)).data.userId == request.auth.uid;
+        allow read: if isAdmin() || isLinkedClient(code);
+        allow create: if isAdmin() || isLinkedClient(code);
+        allow update, delete: if isAdmin() ||
+          (isLinkedClient(code) && resource.data.authorUid == request.auth.uid);
       }
+
+      match /files/{fileId} {
+        allow read: if isAdmin() || isLinkedClient(code);
+        allow write: if isAdmin();
+      }
+
+      match /invoices/{invoiceId} {
+        allow read: if isAdmin() || isLinkedClient(code);
+        allow write: if isAdmin();
+      }
+    }
+
+    match /contactMessages/{messageId} {
+      allow create: if !isSignedIn();
+      allow read, update, delete: if isAdmin();
     }
 
     match /{document=**} {

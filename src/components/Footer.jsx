@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import parallaxLogo from '../assets/ParallaxLogo.png'
+import { useStartProject } from '../hooks/useStartProject'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
@@ -27,6 +28,7 @@ const nav = {
 }
 
 export default function Footer() {
+  const startProject = useStartProject()
   return (
     <footer className="border-t border-white/5 bg-[#080d18] mt-24">
       <div className="max-w-7xl mx-auto px-6 py-16">
@@ -47,13 +49,13 @@ export default function Footer() {
               Systems infrastructure for modern businesses. Built for companies that move beyond templates and no-code limitations.
             </p>
             <div className="mt-6">
-              <Link
-                to="/contact"
+              <button
+                onClick={startProject}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
                 style={{ background: AURORA, boxShadow: '0 2px 16px rgba(15,155,116,0.20)' }}
               >
                 Start a project
-              </Link>
+              </button>
             </div>
           </div>
 

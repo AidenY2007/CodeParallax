@@ -3,6 +3,7 @@ import { motion, useInView } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
+const MotionDiv = motion.div
 
 const PROJECTS = [
   {
@@ -32,7 +33,7 @@ function ProjectCard({ project, index }) {
   const inView = useInView(ref, { once: true, margin: '-60px' })
 
   return (
-    <motion.div
+    <MotionDiv
       ref={ref}
       initial={{ opacity: 0, y: 28 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
@@ -93,7 +94,7 @@ function ProjectCard({ project, index }) {
         className="absolute bottom-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{ background: `linear-gradient(90deg, transparent, ${project.accent}80, transparent)` }}
       />
-    </motion.div>
+    </MotionDiv>
   )
 }
 
@@ -102,9 +103,9 @@ export default function RecentProjects() {
   const headInView = useInView(headRef, { once: true })
 
   return (
-    <section className="py-28 px-6">
+    <section className="pt-12 pb-28 px-6">
       <div className="max-w-5xl mx-auto">
-        <motion.div
+        <MotionDiv
           ref={headRef}
           initial={{ opacity: 0, y: 18 }}
           animate={headInView ? { opacity: 1, y: 0 } : {}}
@@ -123,7 +124,7 @@ export default function RecentProjects() {
           <p className="mt-4 text-slate-400 max-w-md mx-auto leading-relaxed">
             A look at some of the systems we've built — each one designed around the specific operations and goals of the client.
           </p>
-        </motion.div>
+        </MotionDiv>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {PROJECTS.map((project, i) => (

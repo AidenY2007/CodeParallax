@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Layout } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 function AuthVisual() {
   return (
@@ -214,37 +214,63 @@ function DatabaseVisual() {
   )
 }
 
-function APIVisual() {
+function HostingVisual() {
+  const records = [
+    { type: 'A',     name: '@',          value: '76.76.21.21',               ttl: '300' },
+    { type: 'CNAME', name: 'www',        value: 'cname.vercel-dns.com',       ttl: '300' },
+    { type: 'MX',    name: '@',          value: 'mail.parallax.io',           ttl: '3600' },
+    { type: 'TXT',   name: '@',          value: 'v=spf1 include:sendgrid...',  ttl: '300' },
+  ]
+  const typeColors = { A: '#0f9b74', CNAME: '#8b5cf6', MX: '#3b82f6', TXT: '#f59e0b' }
+
   return (
-    <div className="bg-[#0c1426] border border-white/8 rounded-2xl overflow-hidden shadow-2xl w-full max-w-sm mx-auto">
-      <div className="px-5 py-3.5 border-b border-white/5 flex items-center gap-2">
-        <span className="text-xs px-2 py-0.5 rounded font-mono font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20">
-          POST
-        </span>
-        <span className="text-xs text-slate-400 font-mono">/api/v2/process</span>
-      </div>
-      <div className="p-4 font-mono text-xs space-y-0.5">
-        <div className="text-slate-600">{'{'}</div>
-        <div className="pl-4"><span className="text-teal-400">"event"</span><span className="text-slate-500">:</span> <span className="text-emerald-400">"payment.success"</span><span className="text-slate-500">,</span></div>
-        <div className="pl-4"><span className="text-teal-400">"amount"</span><span className="text-slate-500">:</span> <span className="text-violet-400">2400</span><span className="text-slate-500">,</span></div>
-        <div className="pl-4"><span className="text-teal-400">"currency"</span><span className="text-slate-500">:</span> <span className="text-emerald-400">"usd"</span></div>
-        <div className="text-slate-600">{'}'}</div>
-      </div>
-      <div className="px-4 pb-4 pt-1 border-t border-white/5">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs px-2 py-0.5 rounded font-mono font-bold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20">200</span>
-          <span className="text-xs text-slate-500">Response · 42ms</span>
+    <div className="space-y-3 w-full max-w-sm mx-auto">
+      {/* DNS Records */}
+      <div className="bg-[#0c1426] border border-white/8 rounded-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+          <span className="text-xs text-slate-400 font-semibold">DNS Records</span>
+          <span className="text-[10px] text-[#0f9b74] font-mono">parallax.io</span>
         </div>
-        <div className="text-xs text-slate-500 font-mono">
-          <span className="text-teal-400">"status"</span>: <span className="text-emerald-400">"processed"</span>
+        <div className="divide-y divide-white/[0.04]">
+          {records.map((r) => (
+            <div key={r.name + r.type} className="grid grid-cols-[40px_56px_1fr_36px] gap-2 px-4 py-2.5 items-center">
+              <span
+                className="text-[10px] font-bold font-mono px-1.5 py-0.5 rounded text-center"
+                style={{ color: typeColors[r.type], background: `${typeColors[r.type]}18` }}
+              >
+                {r.type}
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono truncate">{r.name}</span>
+              <span className="text-[10px] text-slate-600 font-mono truncate">{r.value}</span>
+              <span className="text-[10px] text-slate-700 font-mono text-right">{r.ttl}s</span>
+            </div>
+          ))}
         </div>
       </div>
-      <div className="px-4 pb-4 flex gap-2 flex-wrap">
-        {['Stripe', 'Twilio', 'Firebase', 'OpenAI'].map((svc) => (
-          <span key={svc} className="text-[11px] px-2 py-0.5 rounded bg-white/5 border border-white/8 text-slate-400">
-            {svc}
-          </span>
-        ))}
+
+      {/* SSL Certificate */}
+      <div className="bg-[#0c1426] border border-white/8 rounded-2xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-xs text-slate-400 font-semibold">SSL Certificate</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#0f9b74]/10 text-[#0f9b74] border border-[#0f9b74]/20 font-mono">Active</span>
+        </div>
+        <div className="space-y-2">
+          {[
+            { label: 'Issuer',   value: "Let's Encrypt" },
+            { label: 'Domain',   value: '*.parallax.io' },
+            { label: 'Expires',  value: 'Mar 14, 2026' },
+            { label: 'Protocol', value: 'TLS 1.3' },
+          ].map((row) => (
+            <div key={row.label} className="flex justify-between text-[11px]">
+              <span className="text-slate-600">{row.label}</span>
+              <span className="text-slate-300 font-mono">{row.value}</span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#0f9b74] animate-pulse" />
+          <span className="text-[11px] text-[#0f9b74] font-mono">Auto-renews in 72 days</span>
+        </div>
       </div>
     </div>
   )
@@ -440,24 +466,14 @@ function AnalyticsVisual() {
 
 const FEATURES = [
   {
-    id: 'auth',
-    tag: 'Authentication',
-    headline: 'Secure account systems built for real products and real teams.',
+    id: 'databases',
+    tag: 'Databases & Dashboards',
+    headline: 'Operational systems with visibility, structure, and control.',
     description:
-      'Identity, access control, and session management — engineered to production standards with role-based permissions, multi-factor authentication, and social login.',
-    href: '/features/authentication',
+      'Scalable databases with admin panels, KPI dashboards, and real-time data feeds — giving your team the clarity they need to operate at speed.',
+    href: '/features/databases-dashboards',
     color: '#0f9b74',
-    Visual: AuthVisual,
-  },
-  {
-    id: 'payments',
-    tag: 'Payments & Fintech',
-    headline: 'Billing, subscriptions, and payment infrastructure that supports revenue.',
-    description:
-      'Stripe-powered checkout, subscription management, invoice generation, and payment lifecycle tracking — built to handle real money movement.',
-    href: '/features/payments',
-    color: '#10b981',
-    Visual: PaymentsVisual,
+    Visual: DatabaseVisual,
   },
   {
     id: 'ai',
@@ -470,44 +486,44 @@ const FEATURES = [
     Visual: AIVisual,
   },
   {
+    id: 'analytics',
+    tag: 'Website Analytics',
+    headline: 'Clarity into performance, user behavior, and conversion.',
+    description:
+      'Real-time traffic dashboards, funnel analysis, custom event tracking, and conversion reporting — data that actually informs decisions.',
+    href: '/features/analytics',
+    color: '#facc15',
+    Visual: AnalyticsVisual,
+  },
+  {
+    id: 'payments',
+    tag: 'Payments & Fintech',
+    headline: 'Billing, subscriptions, and payment infrastructure that supports revenue.',
+    description:
+      'Stripe-powered checkout, subscription management, invoice generation, and payment lifecycle tracking — built to handle real money movement.',
+    href: '/features/payments',
+    color: '#94a3b8',
+    Visual: PaymentsVisual,
+  },
+  {
     id: 'automation',
     tag: 'Automation Workflows',
     headline: 'Trigger-based systems that replace manual work.',
     description:
       'Event-driven workflows with conditional branching, multi-step actions, and real-time execution — operations that run while your team focuses on what matters.',
     href: '/features/automation',
-    color: '#06b6d4',
+    color: '#67e8f9',
     Visual: AutomationVisual,
   },
   {
-    id: 'databases',
-    tag: 'Databases & Dashboards',
-    headline: 'Operational systems with visibility, structure, and control.',
+    id: 'auth',
+    tag: 'Authentication',
+    headline: 'Secure account systems built for real products and real teams.',
     description:
-      'Scalable databases with admin panels, KPI dashboards, and real-time data feeds — giving your team the clarity they need to operate at speed.',
-    href: '/features/databases-dashboards',
-    color: '#0f9b74',
-    Visual: DatabaseVisual,
-  },
-  {
-    id: 'api',
-    tag: 'API Integrations',
-    headline: 'Connect your business to every tool and service it depends on.',
-    description:
-      'Clean API layers that bridge your systems with third-party services — Stripe, Twilio, OpenAI, Firebase, and beyond — with typed contracts and error handling.',
-    href: '/features/api-integrations',
-    color: '#8b5cf6',
-    Visual: APIVisual,
-  },
-  {
-    id: 'communication',
-    tag: 'Communication',
-    headline: 'Email and SMS systems built for the full customer lifecycle.',
-    description:
-      'Transactional emails, drip sequences, SMS alerts, and two-way messaging — all integrated with your business logic and built on Resend, SendGrid, and Twilio.',
-    href: '/features/communication',
-    color: '#06b6d4',
-    Visual: CommunicationVisual,
+      'Identity, access control, and session management — engineered to production standards with role-based permissions, multi-factor authentication, and social login.',
+    href: '/features/authentication',
+    color: '#ef4444',
+    Visual: AuthVisual,
   },
   {
     id: 'ui',
@@ -516,20 +532,32 @@ const FEATURES = [
     description:
       'Pixel-perfect design systems, component libraries, and user interfaces built to reflect your brand — from landing pages to complex dashboards.',
     href: '/features/ui-design',
-    color: '#8b5cf6',
+    color: '#f472b6',
     Visual: UIVisual,
   },
   {
-    id: 'analytics',
-    tag: 'Website Analytics',
-    headline: 'Clarity into performance, user behavior, and conversion.',
+    id: 'communication',
+    tag: 'Communication',
+    headline: 'Email and SMS systems built for the full customer lifecycle.',
     description:
-      'Real-time traffic dashboards, funnel analysis, custom event tracking, and conversion reporting — data that actually informs decisions.',
-    href: '/features/analytics',
-    color: '#f59e0b',
-    Visual: AnalyticsVisual,
+      'Transactional emails, drip sequences, SMS alerts, and two-way messaging — all integrated with your business logic and built on Resend, SendGrid, and Twilio.',
+    href: '/features/communication',
+    color: '#3b82f6',
+    Visual: CommunicationVisual,
+  },
+  {
+    id: 'hosting',
+    tag: 'Hosting & Deployment',
+    headline: 'Ship with confidence. Stay live without thinking about it.',
+    description:
+      'Domain setup, cloud infrastructure, CI/CD pipelines, and uptime monitoring — everything between your code and your users, handled end to end.',
+    href: '/features/hosting',
+    color: '#f97316',
+    Visual: HostingVisual,
   },
 ]
+
+const MotionDiv = motion.div
 
 function FeatureBlock({ feature, index }) {
   const ref = useRef(null)
@@ -537,14 +565,14 @@ function FeatureBlock({ feature, index }) {
   const isEven = index % 2 === 0
 
   return (
-    <div ref={ref} className="py-20 border-t border-white/5">
+    <div ref={ref} className="py-12">
       <div className="max-w-7xl mx-auto px-6">
         <div
           className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${
             isEven ? '' : 'lg:grid-flow-dense'
           }`}
         >
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, x: isEven ? -20 : 20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -568,9 +596,9 @@ function FeatureBlock({ feature, index }) {
               Explore {feature.tag}
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
-          </motion.div>
+          </MotionDiv>
 
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0, x: isEven ? 20 : -20 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.1, ease: [0.21, 0.47, 0.32, 0.98] }}
@@ -581,7 +609,7 @@ function FeatureBlock({ feature, index }) {
               style={{ background: `radial-gradient(ellipse, ${feature.color}, transparent 70%)` }}
             />
             <feature.Visual />
-          </motion.div>
+          </MotionDiv>
         </div>
       </div>
     </div>

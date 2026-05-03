@@ -44,8 +44,8 @@ export const FEATURES = [
     tagline: 'Intelligent systems that make your product smarter.',
     description:
       'We integrate AI into your product in ways that create real leverage — not just a chat bubble. From retrieval-augmented pipelines to intelligent data extraction, we build AI that works.',
-    color: '#a78bfa',
-    gradient: 'from-[#a78bfa]/20 to-transparent',
+    color: '#8b5cf6',
+    gradient: 'from-[#8b5cf6]/20 to-transparent',
     features: [
       { Icon: Bot,       title: 'Custom AI Assistants',  desc: 'Purpose-built assistants trained on your data, tone, and domain knowledge.' },
       { Icon: Search,    title: 'Semantic Search',       desc: 'Vector-powered search that understands intent, not just keywords.' },
@@ -69,8 +69,8 @@ export const FEATURES = [
     tagline: 'Understand your users. Improve what matters.',
     description:
       'We build analytics into your product that gives you real clarity — not vanity metrics. From custom event tracking to conversion funnel analysis, you get the data to make confident decisions.',
-    color: '#f59e0b',
-    gradient: 'from-[#f59e0b]/20 to-transparent',
+    color: '#facc15',
+    gradient: 'from-[#facc15]/20 to-transparent',
     features: [
       { Icon: MousePointer, title: 'Custom Event Tracking', desc: 'Track exactly what matters — clicks, form submissions, feature usage, and more.' },
       { Icon: TrendingUp,   title: 'Conversion Funnels',   desc: 'See where users drop off and optimize the flows that drive your core metrics.' },
@@ -94,8 +94,8 @@ export const FEATURES = [
     tagline: 'Billing infrastructure that grows with your revenue.',
     description:
       'From one-time checkouts to complex subscription tiers, we integrate and build the payment systems your business runs on. Every transaction, invoice, and payout is handled with precision and reliability.',
-    color: '#34d399',
-    gradient: 'from-[#34d399]/20 to-transparent',
+    color: '#94a3b8',
+    gradient: 'from-[#94a3b8]/20 to-transparent',
     features: [
       { Icon: CreditCard, title: 'Stripe Integration',        desc: 'Full Stripe setup — cards, bank transfers, wallets, and international currencies.' },
       { Icon: RefreshCw,  title: 'Subscription Billing',      desc: 'Flexible plans, trial periods, upgrades, downgrades, and proration — all automated.' },
@@ -119,8 +119,8 @@ export const FEATURES = [
     tagline: 'Replace manual work with systems that run themselves.',
     description:
       'We build trigger-based automation into the core of your product — not bolted on. When something happens in your business, the right action fires instantly, reliably, and without anyone touching it.',
-    color: '#06b6d4',
-    gradient: 'from-[#06b6d4]/20 to-transparent',
+    color: '#67e8f9',
+    gradient: 'from-[#67e8f9]/20 to-transparent',
     features: [
       { Icon: Zap,        title: 'Event-Based Triggers',    desc: 'Fire workflows on signups, payments, status changes, API calls, or any custom event.' },
       { Icon: Filter,     title: 'Conditional Logic',       desc: 'Route users and data through branches based on plan, behavior, segment, or any field.' },
@@ -144,8 +144,8 @@ export const FEATURES = [
     tagline: 'Secure identity, access, and sessions — built for real products.',
     description:
       'We build authentication systems that go far beyond a login form. From role-based permissions to OAuth flows and multi-factor verification, your platform gets enterprise-grade identity infrastructure from day one.',
-    color: '#0f9b74',
-    gradient: 'from-[#0f9b74]/20 to-transparent',
+    color: '#ef4444',
+    gradient: 'from-[#ef4444]/20 to-transparent',
     features: [
       { Icon: Shield,     title: 'Role-Based Access Control', desc: 'Granular permissions per user role, ensuring each person sees exactly what they should.' },
       { Icon: Key,        title: 'OAuth & SSO',               desc: 'Sign in with Google, GitHub, Microsoft, and more — or connect your own identity provider.' },
@@ -169,8 +169,8 @@ export const FEATURES = [
     tagline: 'Interfaces your users will actually want to use.',
     description:
       'We design and build custom interfaces from the ground up — no templates, no drag-and-drop builders. Every component, every interaction, and every screen is crafted to match your brand and serve your users.',
-    color: '#8b5cf6',
-    gradient: 'from-[#8b5cf6]/20 to-transparent',
+    color: '#f472b6',
+    gradient: 'from-[#f472b6]/20 to-transparent',
     features: [
       { Icon: Palette,           title: 'Design Systems',         desc: 'A complete component library — tokens, variants, states — built to your brand.' },
       { Icon: MonitorSmartphone, title: 'Responsive Layouts',     desc: 'Pixel-perfect across every screen size, from mobile to ultrawide.' },
@@ -194,8 +194,8 @@ export const FEATURES = [
     tagline: 'Email and SMS systems that drive action at every stage.',
     description:
       'We build communication infrastructure into your product — not just send a few emails. Transactional flows, lifecycle sequences, and broadcast campaigns all delivered reliably and on brand.',
-    color: '#06b6d4',
-    gradient: 'from-[#06b6d4]/20 to-transparent',
+    color: '#3b82f6',
+    gradient: 'from-[#3b82f6]/20 to-transparent',
     features: [
       { Icon: Mail,        title: 'Transactional Email',   desc: 'Receipts, confirmations, password resets, and alerts sent instantly and reliably.' },
       { Icon: Send,        title: 'Lifecycle Sequences',   desc: 'Multi-step email campaigns triggered by user behavior, plan, or time.' },

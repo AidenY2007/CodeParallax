@@ -1,37 +1,84 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
-import { ChevronDown, Menu, X } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { ChevronDown, Menu, X, LayoutDashboard, LogOut } from 'lucide-react'
 import parallaxLogo from '../assets/ParallaxLogo.png'
+import { useAuth } from '../context/AuthContext'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 
 const capabilities = [
-  { label: 'Authentication',       href: '/features/authentication' },
-  { label: 'Payments & Fintech',   href: '/features/payments' },
-  { label: 'AI Integration',       href: '/features/ai' },
-  { label: 'Automation Workflows', href: '/features/automation' },
   { label: 'Databases & Dashboards', href: '/features/databases-dashboards' },
-  { label: 'API Integrations',     href: '/features/api-integrations' },
-  { label: 'Email Systems',        href: '/features/email' },
-  { label: 'SMS Systems',          href: '/features/sms' },
-  { label: 'Website Analytics',    href: '/features/analytics' },
+  { label: 'AI Integration',         href: '/features/ai' },
+  { label: 'Website Analytics',      href: '/features/analytics' },
+  { label: 'Payments & Fintech',     href: '/features/payments' },
+  { label: 'Automation Workflows',   href: '/features/automation' },
+  { label: 'Authentication',         href: '/features/authentication' },
+  { label: 'UI / Design',            href: '/features/ui-design' },
+  { label: 'Communication',          href: '/features/communication' },
+  { label: 'Hosting & Deployment',   href: '/features/hosting' },
 ]
 
 export default function Navbar() {
-  const [scrolled, setScrolled]   = useState(false)
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const { user, logOut, isAdmin } = useAuth()
+  const [scrolled, setScrolled] = useState(false)
+  const [visible, setVisible] = useState(pathname !== '/')
   const [capOpen, setCapOpen]     = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
   const dropdownRef = useRef(null)
 
+  async function handleLogOut() {
+    await logOut()
+    navigate('/')
+  }
+
+  function openAuthModal(modal) {
+    setMobileOpen(false)
+    setUserMenuOpen(false)
+
+    if (pathname === '/') {
+      window.dispatchEvent(new CustomEvent(`open-${modal}`))
+      return
+    }
+
+    navigate('/', { state: { authModal: modal } })
+  }
+
   useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 40)
+    const handler = () => {
+      const isHome = pathname === '/'
+      const hero = document.getElementById('home-hero')
+
+      setScrolled(window.scrollY > 40)
+
+      if (!isHome || !hero) {
+        setVisible(true)
+        return
+      }
+
+      const threshold = Math.max(hero.offsetHeight - window.innerHeight, 0)
+      setVisible(window.scrollY >= threshold)
+    }
+
+    handler()
     window.addEventListener('scroll', handler, { passive: true })
-    return () => window.removeEventListener('scroll', handler)
-  }, [])
+    window.addEventListener('resize', handler)
+
+    return () => {
+      window.removeEventListener('scroll', handler)
+      window.removeEventListener('resize', handler)
+    }
+  }, [pathname])
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled
+      visible
+        ? 'opacity-100 translate-y-0 pointer-events-auto'
+        : 'opacity-0 -translate-y-4 pointer-events-none'
+    } ${
+      scrolled || pathname !== '/'
         ? 'bg-[#080d18]/90 backdrop-blur-xl border-b border-white/5 shadow-2xl shadow-black/50'
         : 'bg-transparent'
     }`}>
@@ -47,10 +94,6 @@ export default function Navbar() {
 
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-7">
-          <Link to="/" className="text-sm text-slate-500 hover:text-white transition-colors duration-200">
-            Home
-          </Link>
-
           <div
             className="relative"
             ref={dropdownRef}
@@ -82,14 +125,66 @@ export default function Navbar() {
         </div>
 
         {/* CTA */}
-        <div className="hidden md:flex items-center">
-          <Link
-            to="/contact"
-            className="px-4 py-2 text-sm font-semibold text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
-            style={{ background: AURORA, boxShadow: '0 2px 16px rgba(15,155,116,0.25)' }}
-          >
-            Start a project
-          </Link>
+        <div className="hidden md:flex items-center gap-3">
+          {user ? (
+            <div className="relative">
+              <button
+                onClick={() => setUserMenuOpen(o => !o)}
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-200"
+              >
+                <div
+                  className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                  style={{ background: AURORA }}
+                >
+                  {(() => {
+                    const parts = (user.displayName ?? '').trim().split(/\s+/).filter(Boolean)
+                    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+                    return (user.displayName ?? user.email ?? '?')[0].toUpperCase()
+                  })()}
+                </div>
+                <span className="text-sm font-semibold text-slate-300 max-w-[120px] truncate">
+                  {isAdmin ? 'Admin' : (user.displayName ?? user.email)}
+                </span>
+              </button>
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-[#0c1426] border border-white/8 rounded-2xl p-2 shadow-2xl shadow-black/60 z-50">
+                  <Link
+                    to={isAdmin ? '/admin/dashboard' : '/profile'}
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    {isAdmin ? 'Dashboard' : 'View profile'}
+                  </Link>
+                  <button
+                    onClick={() => { setUserMenuOpen(false); handleLogOut() }}
+                    className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Log out
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => openAuthModal('login')}
+                className="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-200"
+              >
+                Log in
+              </button>
+              <button
+                type="button"
+                onClick={() => openAuthModal('signup')}
+                className="px-4 py-2 text-sm font-semibold text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
+                style={{ background: AURORA, boxShadow: '0 2px 16px rgba(15,155,116,0.25)' }}
+              >
+                Sign up
+              </button>
+            </>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -106,7 +201,6 @@ export default function Navbar() {
       {mobileOpen && (
         <div className="md:hidden bg-[#0c1426] border-t border-white/5 px-6 py-5 space-y-1">
           {[
-            { label: 'Home', href: '/' },
             { label: 'Contact', href: '/contact' },
           ].map(item => (
             <Link
@@ -132,14 +226,43 @@ export default function Navbar() {
             ))}
           </div>
           <div className="pt-3">
-            <Link
-              to="/contact"
-              onClick={() => setMobileOpen(false)}
-              className="block text-center px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
-              style={{ background: AURORA }}
-            >
-              Start a project
-            </Link>
+            {user ? (
+              <div className="space-y-2">
+                <Link
+                  to={isAdmin ? '/admin/dashboard' : '/dashboard'}
+                  onClick={() => setMobileOpen(false)}
+                  className="block text-center px-4 py-2.5 text-sm font-semibold text-slate-300 rounded-xl border border-white/10 bg-white/[0.03] transition-colors hover:bg-white/[0.06] hover:text-white"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => { setMobileOpen(false); handleLogOut() }}
+                  className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
+                  style={{ background: AURORA }}
+                >
+                  Log out
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={() => openAuthModal('login')}
+                  className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-slate-300 rounded-xl border border-white/10 bg-white/[0.03] transition-colors hover:bg-white/[0.06] hover:text-white"
+                >
+                  Log in
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openAuthModal('signup')}
+                  className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
+                  style={{ background: AURORA }}
+                >
+                  Sign up
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
