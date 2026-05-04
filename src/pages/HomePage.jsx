@@ -3,6 +3,7 @@ import CapabilityGrid from '../sections/CapabilityGrid'
 import FeatureSections from '../sections/FeatureSections'
 import Process from '../sections/Process'
 import RecentProjects from '../sections/RecentProjects'
+import FinalCTA from '../sections/FinalCTA'
 
 export default function HomePage() {
   return (
@@ -12,6 +13,7 @@ export default function HomePage() {
       <FeatureSections />
       <Process />
       <RecentProjects />
+      <FinalCTA />
     </>
   )
 }

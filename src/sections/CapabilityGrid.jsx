@@ -28,7 +28,7 @@ const CAPS = [
   {
     Icon: BarChart2,
     title: 'Website Analytics',
-    description: 'Clarity into performance, user behavior, and conversion.',
+    description: 'Insight into performance, user behavior, and conversion.',
     href: '/features/analytics',
     color: '#facc15',
     glow: 'rgba(250,204,21,0.12)',

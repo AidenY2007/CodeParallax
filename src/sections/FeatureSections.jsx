@@ -470,7 +470,7 @@ const FEATURES = [
     tag: 'Databases & Dashboards',
     headline: 'Operational systems with visibility, structure, and control.',
     description:
-      'Scalable databases with admin panels, KPI dashboards, and real-time data feeds — giving your team the clarity they need to operate at speed.',
+      'Designed to store, manage, and retrieve data efficiently, transforming it into meaningful insights for your business.',
     href: '/features/databases-dashboards',
     color: '#0f9b74',
     Visual: DatabaseVisual,
@@ -480,7 +480,7 @@ const FEATURES = [
     tag: 'AI Integration',
     headline: 'AI-powered assistants, copilots, and intelligent workflows.',
     description:
-      'Embed GPT-4 and other models into your product — conversational interfaces, intelligent routing, document analysis, and automated decision systems.',
+      'Integrate AI into your product to deliver conversational experiences, analyze data, and enable intelligent decision-making.',
     href: '/features/ai',
     color: '#8b5cf6',
     Visual: AIVisual,
@@ -488,9 +488,9 @@ const FEATURES = [
   {
     id: 'analytics',
     tag: 'Website Analytics',
-    headline: 'Clarity into performance, user behavior, and conversion.',
+    headline: 'Insight into performance, user behavior, and conversion.',
     description:
-      'Real-time traffic dashboards, funnel analysis, custom event tracking, and conversion reporting — data that actually informs decisions.',
+      'Real-time dashboards, funnel analysis, and event tracking designed to deliver precise, decision-ready data.',
     href: '/features/analytics',
     color: '#facc15',
     Visual: AnalyticsVisual,
@@ -498,9 +498,9 @@ const FEATURES = [
   {
     id: 'payments',
     tag: 'Payments & Fintech',
-    headline: 'Billing, subscriptions, and payment infrastructure that supports revenue.',
+    headline: 'Payments and billing infrastructure to maximize revenue growth.',
     description:
-      'Stripe-powered checkout, subscription management, invoice generation, and payment lifecycle tracking — built to handle real money movement.',
+      'Stripe-powered checkout, subscription management, invoice generation, and payment lifecycle tracking.',
     href: '/features/payments',
     color: '#94a3b8',
     Visual: PaymentsVisual,
@@ -508,9 +508,9 @@ const FEATURES = [
   {
     id: 'automation',
     tag: 'Automation Workflows',
-    headline: 'Trigger-based systems that replace manual work.',
+    headline: 'Event driven automation to replace manual work.',
     description:
-      'Event-driven workflows with conditional branching, multi-step actions, and real-time execution — operations that run while your team focuses on what matters.',
+      'Designed to keep operations running seamlessly in the background, freeing your team to focus on what matters most.',
     href: '/features/automation',
     color: '#67e8f9',
     Visual: AutomationVisual,
@@ -518,9 +518,9 @@ const FEATURES = [
   {
     id: 'auth',
     tag: 'Authentication',
-    headline: 'Secure account systems built for real products and real teams.',
+    headline: 'Production-grade account infrastructure for applications and teams',
     description:
-      'Identity, access control, and session management — engineered to production standards with role-based permissions, multi-factor authentication, and social login.',
+      'Security is embedded into every layer of your product, ensuring access is controlled, identities are verified, and data remains protected at all times.',
     href: '/features/authentication',
     color: '#ef4444',
     Visual: AuthVisual,
@@ -528,9 +528,9 @@ const FEATURES = [
   {
     id: 'ui',
     tag: 'UI / Design',
-    headline: 'Custom interfaces that make your product impossible to forget.',
+    headline: 'Custom interfaces that make your product stand out across every touchpoint.',
     description:
-      'Pixel-perfect design systems, component libraries, and user interfaces built to reflect your brand — from landing pages to complex dashboards.',
+      'Pixel-perfect design systems, component libraries, and user interfaces designed to reflect your brand across simple dashboards and advanced applications.',
     href: '/features/ui-design',
     color: '#f472b6',
     Visual: UIVisual,
@@ -538,9 +538,9 @@ const FEATURES = [
   {
     id: 'communication',
     tag: 'Communication',
-    headline: 'Email and SMS systems built for the full customer lifecycle.',
+    headline: 'Email and SMS designed to support every stage of the customer lifecycle.',
     description:
-      'Transactional emails, drip sequences, SMS alerts, and two-way messaging — all integrated with your business logic and built on Resend, SendGrid, and Twilio.',
+      'Transactional emails, drip sequences, SMS alerts, all seamlessly integrated with your business logic.',
     href: '/features/communication',
     color: '#3b82f6',
     Visual: CommunicationVisual,
@@ -548,9 +548,9 @@ const FEATURES = [
   {
     id: 'hosting',
     tag: 'Hosting & Deployment',
-    headline: 'Ship with confidence. Stay live without thinking about it.',
+    headline: 'Deploy with confidence. Stay live without uninterrupted.',
     description:
-      'Domain setup, cloud infrastructure, CI/CD pipelines, and uptime monitoring — everything between your code and your users, handled end to end.',
+      'Built to handle real-world demand with consistent performance and stability at scale.',
     href: '/features/hosting',
     color: '#f97316',
     Visual: HostingVisual,
