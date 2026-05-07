@@ -1,22 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ChevronDown, Menu, X, LayoutDashboard, LogOut } from 'lucide-react'
+import { Menu, X, LayoutDashboard, LogOut } from 'lucide-react'
 import parallaxLogo from '../assets/ParallaxLogo.png'
 import { useAuth } from '../context/AuthContext'
 
 const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
-
-const capabilities = [
-  { label: 'Databases & Dashboards', href: '/features/databases-dashboards' },
-  { label: 'AI Integration',         href: '/features/ai' },
-  { label: 'Website Analytics',      href: '/features/analytics' },
-  { label: 'Payments & Fintech',     href: '/features/payments' },
-  { label: 'Automation Workflows',   href: '/features/automation' },
-  { label: 'Authentication',         href: '/features/authentication' },
-  { label: 'UI / Design',            href: '/features/ui-design' },
-  { label: 'Communication',          href: '/features/communication' },
-  { label: 'Hosting & Deployment',   href: '/features/hosting' },
-]
 
 export default function Navbar() {
   const { pathname } = useLocation()
@@ -24,10 +12,8 @@ export default function Navbar() {
   const { user, logOut, isAdmin } = useAuth()
   const [scrolled, setScrolled] = useState(false)
   const [visible, setVisible] = useState(pathname !== '/')
-  const [capOpen, setCapOpen]     = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
-  const dropdownRef = useRef(null)
 
   async function handleLogOut() {
     await logOut()
@@ -92,38 +78,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-7">
-          <div
-            className="relative"
-            ref={dropdownRef}
-            onMouseEnter={() => setCapOpen(true)}
-            onMouseLeave={() => setCapOpen(false)}
-          >
-            <button className="flex items-center gap-1 text-sm text-slate-500 hover:text-white transition-colors duration-200">
-              Capabilities
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${capOpen ? 'rotate-180' : ''}`} />
-            </button>
-            <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-3 w-60 bg-[#0c1426] border border-white/8 rounded-2xl p-2 shadow-2xl shadow-black/60 transition-all duration-200 ${
-              capOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
-            }`}>
-              {capabilities.map(cap => (
-                <Link
-                  key={cap.href}
-                  to={cap.href}
-                  className="block px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-colors duration-150"
-                >
-                  {cap.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          <Link to="/contact" className="text-sm text-slate-500 hover:text-white transition-colors duration-200">
-            Contact
-          </Link>
-        </div>
-
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
           {user ? (
@@ -178,11 +132,17 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => openAuthModal('signup')}
-                className="px-4 py-2 text-sm font-semibold text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
-                style={{ background: AURORA, boxShadow: '0 2px 16px rgba(15,155,116,0.25)' }}
+                className="px-4 py-2 text-sm font-semibold text-slate-400 hover:text-white rounded-xl border border-white/10 hover:border-white/20 bg-white/[0.03] hover:bg-white/[0.06] transition-all duration-200"
               >
                 Sign up
               </button>
+              <Link
+                to="/contact"
+                className="px-4 py-2 text-sm font-semibold text-white rounded-xl transition-all duration-200 hover:-translate-y-0.5"
+                style={{ background: AURORA, boxShadow: '0 2px 16px rgba(15,155,116,0.25)' }}
+              >
+                Contact
+              </Link>
             </>
           )}
         </div>
@@ -200,31 +160,6 @@ export default function Navbar() {
       {/* Mobile menu */}
       {mobileOpen && (
         <div className="md:hidden bg-[#0c1426] border-t border-white/5 px-6 py-5 space-y-1">
-          {[
-            { label: 'Contact', href: '/contact' },
-          ].map(item => (
-            <Link
-              key={item.href}
-              to={item.href}
-              onClick={() => setMobileOpen(false)}
-              className="block py-2.5 text-sm text-slate-400 hover:text-white transition-colors border-b border-white/5 last:border-0"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <div className="pt-3">
-            <p className="text-xs text-slate-600 uppercase tracking-widest mb-2">Capabilities</p>
-            {capabilities.map(cap => (
-              <Link
-                key={cap.href}
-                to={cap.href}
-                onClick={() => setMobileOpen(false)}
-                className="block py-2 text-sm text-slate-500 hover:text-white transition-colors"
-              >
-                {cap.label}
-              </Link>
-            ))}
-          </div>
           <div className="pt-3">
             {user ? (
               <div className="space-y-2">
@@ -256,11 +191,18 @@ export default function Navbar() {
                 <button
                   type="button"
                   onClick={() => openAuthModal('signup')}
-                  className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
-                  style={{ background: AURORA }}
+                  className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-slate-300 rounded-xl border border-white/10 bg-white/[0.03] transition-colors hover:bg-white/[0.06] hover:text-white"
                 >
                   Sign up
                 </button>
+                <Link
+                  to="/contact"
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-center px-4 py-2.5 text-sm font-semibold text-white rounded-xl transition-colors"
+                  style={{ background: AURORA }}
+                >
+                  Contact
+                </Link>
               </div>
             )}
           </div>

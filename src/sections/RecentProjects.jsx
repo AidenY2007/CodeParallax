@@ -1,30 +1,146 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Send } from 'lucide-react'
+import flyParallaxAd from '../assets/FlyParallaxAd.mov'
 
-const AURORA = 'linear-gradient(135deg, #0f9b74 0%, #06b6d4 55%, #8b5cf6 100%)'
 const MotionDiv = motion.div
 
+const MESSAGES = [
+  { side: 'right', text: 'Hi this is Aiden from Teen Line! What is your name?' },
+  { side: 'left',  text: "hey aiden, i'm aisha" },
+  { side: 'right', text: 'What would you like to discuss today?' },
+  { side: 'left',  text: "idk, i guess i just feel kinda overwhelmed rn" },
+  { side: 'right', text: 'Is something specific on your mind?' },
+  { side: 'left',  text: "yeah, i think i mightve messed everything up" },
+  { side: 'right', text: "It's okay to feel that way. Let's create a course of action to feel better." },
+  { side: 'left',  text: "idk if there's anything i can do tbh. it's just a lot and i feel stuck" },
+]
+
+const NOTE_TEXT = "After hearing Aisha describe feeling overwhelmed, stuck, and blaming herself, my goal is to create a safe and supportive space where she feels heard and understood. I'll focus on validating her emotions and reflecting back on what she is experiencing to build trust and encourage deeper sharing. I aim to avoid rushing into solutions and instead help her process her feelings and identify what is contributing to her distress. From there, my goal is to gently guide her toward manageable next steps once she feels more grounded."
+
+function ReplylineVisual() {
+  return (
+    <div
+      className="rounded-xl overflow-hidden mt-3 mb-0 flex flex-col"
+      style={{ background: '#f1f5f9', border: '1px solid rgba(0,0,0,0.07)', height: 416 }}
+    >
+      {/* App header */}
+      <div className="flex items-center justify-between px-3 py-2 border-b border-black/[0.07] bg-white/80">
+        <div>
+          <p className="text-[7px] font-bold tracking-[0.15em] uppercase text-slate-400">Practice Session</p>
+          <p className="text-[10px] font-bold text-slate-700 leading-tight">Sexual health</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[8px] font-semibold px-2 py-0.5 rounded-full border border-emerald-300 text-emerald-600 bg-emerald-50">
+            Implemented
+          </span>
+          <span className="text-[8px] font-semibold text-slate-600">Complete session</span>
+        </div>
+      </div>
+
+      {/* Two-panel body */}
+      <div className="flex flex-1" style={{ minHeight: 0 }}>
+        {/* Left: chat */}
+        <div className="flex flex-col flex-1 border-r border-black/[0.07]" style={{ minWidth: 0 }}>
+          <div className="flex-1 px-2.5 pt-2.5 pb-1.5 space-y-1.5 overflow-y-auto">
+            {MESSAGES.map((msg, i) => (
+              <div key={i} className={`flex ${msg.side === 'right' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className="text-[9px] leading-relaxed px-2.5 py-1 rounded-2xl max-w-[75%]"
+                  style={
+                    msg.side === 'right'
+                      ? { background: 'linear-gradient(135deg, #93c5fd, #60a5fa)', color: '#fff', borderBottomRightRadius: 3 }
+                      : { background: '#fff', color: '#334155', border: '1px solid rgba(0,0,0,0.08)', borderBottomLeftRadius: 3 }
+                  }
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Input */}
+          <div className="flex items-center gap-1.5 px-2.5 py-2 border-t border-black/[0.07] bg-white/60">
+            <div className="flex-1 text-[9px] text-slate-400 bg-white border border-black/[0.08] rounded-xl px-2.5 py-1.5">
+              Type your response... (Enter to send)
+            </div>
+            <div
+              className="px-2.5 py-1 rounded-xl flex-shrink-0 text-[9px] font-semibold text-white"
+              style={{ background: '#7ab8f5' }}
+            >
+              Send
+            </div>
+          </div>
+        </div>
+
+        {/* Right: session notes */}
+        <div className="flex flex-col bg-white" style={{ width: '40%', minWidth: 0 }}>
+          <div className="px-3 pt-3 pb-2 border-b border-black/[0.06]">
+            <p className="text-[8px] font-bold tracking-[0.12em] uppercase text-slate-500 mb-0.5">Session Notes</p>
+            <p className="text-[8px] text-slate-400">Keep track of what's happening in the conversation.</p>
+          </div>
+          <div className="px-3 pt-2 pb-1 flex flex-col gap-2 flex-1 overflow-hidden">
+            <div className="text-[9px] font-medium text-slate-700 bg-white border border-black/[0.1] rounded-xl px-2.5 py-1.5 shadow-sm">
+              Aisha's Opening Talk
+            </div>
+            <div className="text-[8px] text-slate-600 leading-relaxed bg-white border border-black/[0.1] rounded-xl px-2.5 py-2 flex-1 overflow-hidden shadow-sm">
+              {NOTE_TEXT}
+            </div>
+          </div>
+          <div className="px-3 py-2 border-t border-black/[0.06]">
+            <div
+              className="w-full text-center text-[8px] font-semibold py-1.5 rounded-xl text-white shadow-sm"
+              style={{ background: '#7ab8f5' }}
+            >
+              Save and create new note
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FlyParallaxVisual() {
+  return (
+    <div className="mt-3 mb-0 flex justify-center items-center" style={{ height: 416 }}>
+      <video
+        src={flyParallaxAd}
+        autoPlay
+        loop
+        muted
+        playsInline
+        style={{
+          height: '100%',
+          width: 'auto',
+          display: 'block',
+          borderRadius: 12,
+          border: '1px solid rgba(255,255,255,0.1)',
+        }}
+      />
+    </div>
+  )
+}
+
 const PROJECTS = [
-  {
-    name: 'Replyline',
-    url: 'replyline.org',
-    href: 'https://replyline.org',
-    description:
-      'A modern communication platform built for teams that need structured, async-first messaging with intelligent routing and response tracking.',
-    tags: ['Platform', 'Messaging', 'AI'],
-    accent: '#0f9b74',
-    status: 'Live',
-  },
   {
     name: 'FlyParallax',
     url: 'flyparallax.com',
     href: 'https://flyparallax.com',
     description:
-      'An aviation-focused operations system delivering real-time flight data, crew coordination tools, and logistics management for charter operators.',
-    tags: ['Aviation', 'Operations', 'Real-time'],
+      'FlyParallax is an AI travel concierge designed to optimize its clients’ booking experience through streamlined flight discovery and personalized travel research.',
+    accent: '#0f9b74',
+    status: 'Live',
+    Visual: FlyParallaxVisual,
+  },
+  {
+    name: 'Replyline',
+    url: 'replyline.org',
+    href: 'https://replyline.org',
+    description:
+      'Replyline is an AI-powered training platform designed to help mental health professionals develop experience communicating with distressed teens across a wide range of sensitive and emotionally complex situations.',
     accent: '#06b6d4',
     status: 'Live',
+    Visual: ReplylineVisual,
   },
 ]
 
@@ -58,7 +174,14 @@ function ProjectCard({ project, index }) {
             </span>
           </div>
           <h3 className="text-2xl font-extrabold text-white tracking-tight">{project.name}</h3>
-          <span className="text-sm font-mono text-slate-500 mt-0.5 block">{project.url}</span>
+          <a
+            href={project.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-mono text-slate-500 hover:text-slate-300 mt-0.5 block transition-colors"
+          >
+            {project.url}
+          </a>
         </div>
 
         <a
@@ -73,21 +196,12 @@ function ProjectCard({ project, index }) {
       </div>
 
       {/* Description */}
-      <p className="text-slate-400 leading-relaxed text-sm flex-1 mb-6 relative">
+      <p className="text-slate-400 leading-relaxed text-sm flex-1 mb-4 relative">
         {project.description}
       </p>
 
-      {/* Tags */}
-      <div className="flex flex-wrap gap-2 relative">
-        {project.tags.map(tag => (
-          <span
-            key={tag}
-            className="text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-white/[0.07] bg-white/[0.03] text-slate-500"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
+      {/* Dynamic visual */}
+      {project.Visual && <project.Visual />}
 
       {/* Bottom accent line */}
       <div
@@ -103,7 +217,7 @@ export default function RecentProjects() {
   const headInView = useInView(headRef, { once: true })
 
   return (
-    <section className="pt-12 pb-28 px-6">
+    <section className="py-16 px-6">
       <div className="max-w-5xl mx-auto">
         <MotionDiv
           ref={headRef}
@@ -112,17 +226,11 @@ export default function RecentProjects() {
           transition={{ duration: 0.6, ease: [0.21, 0.47, 0.32, 0.98] }}
           className="text-center mb-16"
         >
-          <span
-            className="text-xs font-semibold tracking-[0.2em] uppercase"
-            style={{ backgroundImage: AURORA, backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent' }}
-          >
-            Recent Work
-          </span>
-          <h2 className="mt-3 text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Projects we've shipped.
+          <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            Recent projects we've shipped.
           </h2>
           <p className="mt-4 text-slate-400 max-w-md mx-auto leading-relaxed">
-            A look at some of the systems we've built — each one designed around the specific operations and goals of the client.
+            See what Parallax can create for your business.
           </p>
         </MotionDiv>
 

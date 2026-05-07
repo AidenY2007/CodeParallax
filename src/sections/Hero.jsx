@@ -744,6 +744,18 @@ export default function Hero() {
   const [loginOpen, setLoginOpen] = useState(false)
   const [signupOpen, setSignupOpen] = useState(false)
 
+  const [widgetScale, setWidgetScale] = useState(1)
+  useEffect(() => {
+    function updateScale() {
+      const wScale = Math.min(1.25, window.innerWidth / 1150)
+      const hScale = Math.min(1.25, window.innerHeight / 680)
+      setWidgetScale(Math.max(0.45, Math.min(wScale, hScale)))
+    }
+    updateScale()
+    window.addEventListener('resize', updateScale)
+    return () => window.removeEventListener('resize', updateScale)
+  }, [])
+
   // Form state
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
@@ -1108,7 +1120,7 @@ export default function Hero() {
         <motion.div className="absolute inset-0 bg-[#080d18] pointer-events-none z-20" style={{ opacity: veilOpacity }} />
 
         {/* Permanent widget layout on desktop widths */}
-        <div className="absolute inset-0 z-10 hidden xl:block pointer-events-none">
+        <div className="absolute inset-0 z-10 hidden lg:block pointer-events-none">
           {WIDGETS.map((Component, index) => {
             if (!Component) return null
 
@@ -1123,7 +1135,7 @@ export default function Hero() {
                   left: layout.left,
                   right: layout.right,
                   top: layout.top,
-                  transform: `scale(${layout.scale})`,
+                  transform: `scale(${layout.scale * widgetScale})`,
                   transformOrigin: layout.right ? 'top right' : 'top left',
                 }}
               >

@@ -10,7 +10,7 @@ const STEPS = [
   },
   {
     number: '02',
-    title: 'Build',
+    title: 'Execute',
     description: 'We engineer the system to production-grade quality. Built for reliability, scalability, and long-term performance.',
     color: '#06b6d4',
     icon: Code2,
@@ -37,7 +37,7 @@ const TRACK_GRADIENT_V = 'linear-gradient(180deg, #0f9b74, #06b6d4 33%, #3b82f6 
 
 export default function Process() {
   return (
-    <section className="py-28 px-6">
+    <section className="py-16 px-6">
       <div className="max-w-6xl mx-auto">
 
         {/* Header */}

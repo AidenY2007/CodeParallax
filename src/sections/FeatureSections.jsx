@@ -1,7 +1,5 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { ArrowRight } from 'lucide-react'
 
 function AuthVisual() {
   return (
@@ -385,7 +383,7 @@ function UIVisual() {
         {/* Input */}
         <div className="h-9 bg-white/4 border border-white/8 rounded-xl px-3 flex items-center gap-2">
           <span className="text-xs text-slate-500">Search components...</span>
-          <div className="ml-auto w-px h-4 bg-[#0f9b74] animate-blink" />
+          <div className="ml-auto w-px h-4 bg-[#0f9b74]" />
         </div>
         {/* Color palette */}
         <div className="flex items-center gap-2">
@@ -471,7 +469,6 @@ const FEATURES = [
     headline: 'Operational systems with visibility, structure, and control.',
     description:
       'Designed to store, manage, and retrieve data efficiently, transforming it into meaningful insights for your business.',
-    href: '/features/databases-dashboards',
     color: '#0f9b74',
     Visual: DatabaseVisual,
   },
@@ -481,7 +478,6 @@ const FEATURES = [
     headline: 'AI-powered assistants, copilots, and intelligent workflows.',
     description:
       'Integrate AI into your product to deliver conversational experiences, analyze data, and enable intelligent decision-making.',
-    href: '/features/ai',
     color: '#8b5cf6',
     Visual: AIVisual,
   },
@@ -491,7 +487,6 @@ const FEATURES = [
     headline: 'Insight into performance, user behavior, and conversion.',
     description:
       'Real-time dashboards, funnel analysis, and event tracking designed to deliver precise, decision-ready data.',
-    href: '/features/analytics',
     color: '#facc15',
     Visual: AnalyticsVisual,
   },
@@ -501,7 +496,6 @@ const FEATURES = [
     headline: 'Payments and billing infrastructure to maximize revenue growth.',
     description:
       'Stripe-powered checkout, subscription management, invoice generation, and payment lifecycle tracking.',
-    href: '/features/payments',
     color: '#94a3b8',
     Visual: PaymentsVisual,
   },
@@ -511,7 +505,6 @@ const FEATURES = [
     headline: 'Event driven automation to replace manual work.',
     description:
       'Designed to keep operations running seamlessly in the background, freeing your team to focus on what matters most.',
-    href: '/features/automation',
     color: '#67e8f9',
     Visual: AutomationVisual,
   },
@@ -521,7 +514,6 @@ const FEATURES = [
     headline: 'Production-grade account infrastructure for applications and teams',
     description:
       'Security is embedded into every layer of your product, ensuring access is controlled, identities are verified, and data remains protected at all times.',
-    href: '/features/authentication',
     color: '#ef4444',
     Visual: AuthVisual,
   },
@@ -531,7 +523,6 @@ const FEATURES = [
     headline: 'Custom interfaces that make your product stand out across every touchpoint.',
     description:
       'Pixel-perfect design systems, component libraries, and user interfaces designed to reflect your brand across simple dashboards and advanced applications.',
-    href: '/features/ui-design',
     color: '#f472b6',
     Visual: UIVisual,
   },
@@ -541,7 +532,6 @@ const FEATURES = [
     headline: 'Email and SMS designed to support every stage of the customer lifecycle.',
     description:
       'Transactional emails, drip sequences, SMS alerts, all seamlessly integrated with your business logic.',
-    href: '/features/communication',
     color: '#3b82f6',
     Visual: CommunicationVisual,
   },
@@ -551,7 +541,6 @@ const FEATURES = [
     headline: 'Deploy with confidence. Stay live without uninterrupted.',
     description:
       'Built to handle real-world demand with consistent performance and stability at scale.',
-    href: '/features/hosting',
     color: '#f97316',
     Visual: HostingVisual,
   },
@@ -565,7 +554,7 @@ function FeatureBlock({ feature, index }) {
   const isEven = index % 2 === 0
 
   return (
-    <div ref={ref} className="py-12">
+    <div id={`feature-${feature.id}`} ref={ref} className="scroll-mt-24 py-8">
       <div className="max-w-7xl mx-auto px-6">
         <div
           className={`grid grid-cols-1 lg:grid-cols-2 gap-16 items-center ${
@@ -588,14 +577,6 @@ function FeatureBlock({ feature, index }) {
               {feature.headline}
             </h2>
             <p className="mt-4 text-slate-400 leading-relaxed">{feature.description}</p>
-            <Link
-              to={feature.href}
-              className="group inline-flex items-center gap-2 mt-6 text-sm font-semibold transition-colors duration-200"
-              style={{ color: feature.color }}
-            >
-              Explore {feature.tag}
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
           </MotionDiv>
 
           <MotionDiv

@@ -1,6 +1,5 @@
 import { useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
-import { Link } from 'react-router-dom'
 import {
   Lock, CreditCard, Sparkles, GitBranch, Database,
   MessageSquare, BarChart2, Layout, ArrowUpRight, Server,
@@ -11,7 +10,7 @@ const CAPS = [
     Icon: Database,
     title: 'Databases & Dashboards',
     description: 'Operational systems with visibility, structure, and control.',
-    href: '/features/databases-dashboards',
+    target: 'feature-databases',
     color: '#0f9b74',
     glow: 'rgba(15,155,116,0.12)',
     border: 'rgba(15,155,116,0.25)',
@@ -20,7 +19,7 @@ const CAPS = [
     Icon: Sparkles,
     title: 'AI Integration',
     description: 'AI-powered assistants, copilots, and intelligent workflows.',
-    href: '/features/ai',
+    target: 'feature-ai',
     color: '#8b5cf6',
     glow: 'rgba(139,92,246,0.12)',
     border: 'rgba(139,92,246,0.25)',
@@ -29,7 +28,7 @@ const CAPS = [
     Icon: BarChart2,
     title: 'Website Analytics',
     description: 'Insight into performance, user behavior, and conversion.',
-    href: '/features/analytics',
+    target: 'feature-analytics',
     color: '#facc15',
     glow: 'rgba(250,204,21,0.12)',
     border: 'rgba(250,204,21,0.25)',
@@ -38,7 +37,7 @@ const CAPS = [
     Icon: CreditCard,
     title: 'Payments & Fintech',
     description: 'Billing, subscriptions, and payment infrastructure that supports revenue.',
-    href: '/features/payments',
+    target: 'feature-payments',
     color: '#94a3b8',
     glow: 'rgba(148,163,184,0.12)',
     border: 'rgba(148,163,184,0.25)',
@@ -47,7 +46,7 @@ const CAPS = [
     Icon: GitBranch,
     title: 'Automation Workflows',
     description: 'Trigger-based systems that replace manual, repetitive work.',
-    href: '/features/automation',
+    target: 'feature-automation',
     color: '#67e8f9',
     glow: 'rgba(103,232,249,0.12)',
     border: 'rgba(103,232,249,0.25)',
@@ -56,7 +55,7 @@ const CAPS = [
     Icon: Lock,
     title: 'Authentication',
     description: 'Secure identity, roles, and session management for real products.',
-    href: '/features/authentication',
+    target: 'feature-auth',
     color: '#ef4444',
     glow: 'rgba(239,68,68,0.12)',
     border: 'rgba(239,68,68,0.25)',
@@ -65,7 +64,7 @@ const CAPS = [
     Icon: Layout,
     title: 'UI / Design',
     description: 'Custom interfaces and design systems built to your brand at every touchpoint.',
-    href: '/features/ui-design',
+    target: 'feature-ui',
     color: '#f472b6',
     glow: 'rgba(244,114,182,0.12)',
     border: 'rgba(244,114,182,0.25)',
@@ -74,7 +73,7 @@ const CAPS = [
     Icon: MessageSquare,
     title: 'Communication',
     description: 'Email and SMS systems for lifecycle messaging, alerts, and conversion.',
-    href: '/features/communication',
+    target: 'feature-communication',
     color: '#3b82f6',
     glow: 'rgba(59,130,246,0.12)',
     border: 'rgba(59,130,246,0.25)',
@@ -83,7 +82,7 @@ const CAPS = [
     Icon: Server,
     title: 'Hosting & Deployment',
     description: 'Domain, cloud infrastructure, CI/CD, and monitoring — ship and stay live.',
-    href: '/features/hosting',
+    target: 'feature-hosting',
     color: '#f97316',
     glow: 'rgba(249,115,22,0.12)',
     border: 'rgba(249,115,22,0.25)',
@@ -96,6 +95,11 @@ function CapCard({ cap, index }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-40px' })
 
+  function scrollToFeature() {
+    document.getElementById(cap.target)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.history.replaceState(null, '', `#${cap.target}`)
+  }
+
   return (
     <MotionDiv
       ref={ref}
@@ -103,9 +107,10 @@ function CapCard({ cap, index }) {
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.055, ease: [0.21, 0.47, 0.32, 0.98] }}
     >
-      <Link
-        to={cap.href}
-        className="group relative flex flex-col h-full p-6 bg-[#0c1426] border border-white/6 rounded-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+      <button
+        type="button"
+        onClick={scrollToFeature}
+        className="group relative flex w-full flex-col h-full p-6 text-left bg-[#0c1426] border border-white/6 rounded-2xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
       >
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none"
@@ -126,7 +131,7 @@ function CapCard({ cap, index }) {
           Learn more
           <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
         </div>
-      </Link>
+      </button>
     </MotionDiv>
   )
 }
@@ -136,7 +141,7 @@ export default function CapabilityGrid() {
   const headInView = useInView(headRef, { once: true })
 
   return (
-    <section id="capabilities" className="pt-14 pb-28 px-6">
+    <section id="capabilities" className="pt-14 pb-16 px-6">
       <div className="max-w-7xl mx-auto">
         <MotionDiv
           ref={headRef}
