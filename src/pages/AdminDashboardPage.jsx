@@ -8,6 +8,7 @@ import {
 import {
   LogOut, Plus, X, Users, FolderOpen, Copy, Check,
   RefreshCw, Trash2, ChevronDown, ChevronUp, Pencil, ReceiptText,
+  Inbox, Mail, Phone, Tag,
 } from 'lucide-react'
 import { httpsCallable } from 'firebase/functions'
 import { db, functions } from '../lib/firebase'
@@ -73,6 +74,11 @@ export default function AdminDashboardPage() {
   const [editUserForm, setEditUserForm] = useState({})
   const [savingUser, setSavingUser] = useState(false)
   const [saveUserError, setSaveUserError] = useState('')
+
+  // Messages state
+  const [messages, setMessages] = useState([])
+  const [loadingMessages, setLoadingMessages] = useState(false)
+  const [expandedMsg, setExpandedMsg] = useState(null)
 
   // Create project form
   const [form, setForm] = useState({ name: '', clientName: '', description: '', status: 'in_progress' })
@@ -146,10 +152,34 @@ export default function AdminDashboardPage() {
     }
   }
 
+  async function loadMessages() {
+    setLoadingMessages(true)
+    try {
+      const snap = await getDocs(query(collection(db, 'contactMessages'), orderBy('createdAt', 'desc')))
+      setMessages(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    } catch {
+      setMessages([])
+    } finally {
+      setLoadingMessages(false)
+    }
+  }
+
+  async function markRead(id) {
+    await updateDoc(doc(db, 'contactMessages', id), { read: true })
+    setMessages(ms => ms.map(m => m.id === id ? { ...m, read: true } : m))
+  }
+
+  async function deleteMessage(id) {
+    await deleteDoc(doc(db, 'contactMessages', id))
+    setMessages(ms => ms.filter(m => m.id !== id))
+    if (expandedMsg === id) setExpandedMsg(null)
+  }
+
   function handleTabChange(t) {
     setTab(t)
     if (t === 'users' && users.length === 0) loadUsers()
     if (t === 'invoices') loadAllInvoices()
+    if (t === 'messages') loadMessages()
   }
 
   async function handleCreate(e) {
@@ -391,7 +421,8 @@ export default function AdminDashboardPage() {
             { id: 'projects',  label: 'Projects', icon: <FolderOpen className="w-4 h-4" /> },
             { id: 'users',     label: 'Users',    icon: <Users className="w-4 h-4" /> },
             { id: 'invoices',  label: 'Invoices', icon: <ReceiptText className="w-4 h-4" /> },
-          ].map(({ id, label, icon }) => (
+            { id: 'messages',  label: 'Messages', icon: <Inbox className="w-4 h-4" />, badge: messages.filter(m => !m.read).length },
+          ].map(({ id, label, icon, badge }) => (
             <button
               key={id}
               onClick={() => handleTabChange(id)}
@@ -403,6 +434,11 @@ export default function AdminDashboardPage() {
             >
               {icon}
               {label}
+              {badge > 0 && (
+                <span className="flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold text-white" style={{ background: '#ef4444' }}>
+                  {badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -705,6 +741,131 @@ export default function AdminDashboardPage() {
             )}
           </MotionDiv>
         )}
+        {/* Messages tab */}
+        {tab === 'messages' && (
+          <MotionDiv initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <h2 className="text-lg font-bold text-white">Messages</h2>
+                {messages.filter(m => !m.read).length > 0 && (
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full text-white" style={{ background: '#ef4444' }}>
+                    {messages.filter(m => !m.read).length} unread
+                  </span>
+                )}
+              </div>
+              <button onClick={loadMessages} className="p-2 text-slate-500 hover:text-white transition-colors rounded-xl hover:bg-white/5">
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+
+            {loadingMessages ? (
+              <div className="flex justify-center py-16">
+                <div className="w-6 h-6 rounded-full border-2 border-white/10 border-t-white/60 animate-spin" />
+              </div>
+            ) : messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
+                  <Inbox className="w-5 h-5 text-slate-600" />
+                </div>
+                <p className="text-slate-500 text-sm">No messages yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {messages.map(msg => {
+                  const isOpen = expandedMsg === msg.id
+                  const date = msg.createdAt?.toDate?.()
+                  const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
+                  const timeStr = date ? date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : ''
+                  return (
+                    <div
+                      key={msg.id}
+                      className="bg-[#0c1426] border rounded-2xl overflow-hidden transition-colors"
+                      style={{ borderColor: !msg.read ? 'rgba(6,182,212,0.25)' : 'rgba(255,255,255,0.06)' }}
+                    >
+                      {/* Row */}
+                      <button
+                        className="w-full flex items-center gap-4 px-5 py-4 text-left hover:bg-white/[0.02] transition-colors"
+                        onClick={() => {
+                          const next = isOpen ? null : msg.id
+                          setExpandedMsg(next)
+                          if (!msg.read && next) markRead(msg.id)
+                        }}
+                      >
+                        {/* Unread dot */}
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: !msg.read ? '#06b6d4' : 'transparent' }} />
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-semibold text-white">{msg.name}</span>
+                            {!msg.read && (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-[#06b6d4]" style={{ background: 'rgba(6,182,212,0.12)', border: '1px solid rgba(6,182,212,0.25)' }}>New</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                            <span className="text-xs text-slate-500">{msg.email}</span>
+                            {msg.features?.length > 0 && (
+                              <span className="text-xs text-slate-600">· {msg.features.slice(0, 2).join(', ')}{msg.features.length > 2 ? ` +${msg.features.length - 2}` : ''}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className="text-xs text-slate-600 hidden sm:block">{dateStr}</span>
+                          {isOpen ? <ChevronUp className="w-4 h-4 text-slate-500" /> : <ChevronDown className="w-4 h-4 text-slate-500" />}
+                        </div>
+                      </button>
+
+                      {/* Expanded */}
+                      {isOpen && (
+                        <div className="border-t border-white/[0.05] px-5 py-4 space-y-4">
+                          {/* Meta */}
+                          <div className="flex flex-wrap gap-3">
+                            <a href={`mailto:${msg.email}`} className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white transition-colors">
+                              <Mail className="w-3.5 h-3.5" />
+                              {msg.email}
+                            </a>
+                            {msg.features?.length > 0 && (
+                              <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                <Tag className="w-3.5 h-3.5" />
+                                {msg.features.join(', ')}
+                              </div>
+                            )}
+                            <span className="text-xs text-slate-600">{dateStr} at {timeStr}</span>
+                          </div>
+
+                          {/* Message body */}
+                          <div className="bg-white/[0.02] border border-white/[0.05] rounded-xl px-4 py-3">
+                            <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{msg.message}</p>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center justify-between">
+                            <a
+                              href={`mailto:${msg.email}?subject=Re: Your Parallax Inquiry`}
+                              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-white transition-transform hover:-translate-y-0.5"
+                              style={{ background: AURORA }}
+                            >
+                              <Mail className="w-3.5 h-3.5" />
+                              Reply
+                            </a>
+                            <button
+                              onClick={() => deleteMessage(msg.id)}
+                              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </MotionDiv>
+        )}
+
       </main>
 
       {/* Create invoice modal */}

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { collection, doc, onSnapshot } from 'firebase/firestore'
-import { LogOut, FolderOpen, Clock, CheckCircle, Circle, ArrowUpRight, Plus } from 'lucide-react'
+import { LogOut, FolderOpen, Clock, CheckCircle, Circle, ArrowUpRight, Plus, Mail } from 'lucide-react'
 import { db } from '../lib/firebase'
 import { useAuth } from '../context/AuthContext'
 import { useStartProject } from '../hooks/useStartProject'
@@ -141,6 +141,26 @@ export default function DashboardPage() {
           <p className="mt-2 text-slate-400">Access your projects & invoices below.</p>
         </MotionDiv>
 
+        {/* Contact card */}
+        <MotionDiv
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mb-8 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        >
+          <div>
+            <p className="text-xs font-semibold text-slate-500 tracking-widest uppercase mb-1">Need assistance?</p>
+            <p className="text-sm text-slate-300">Reach out to us anytime and we'll get back to you within 24 hours.</p>
+          </div>
+          <a
+            href="mailto:codeparallaxservices@gmail.com"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-200 border border-white/[0.10] bg-white/[0.04] whitespace-nowrap transition-colors hover:bg-white/[0.08] hover:text-white flex-shrink-0"
+          >
+            <Mail className="w-4 h-4" />
+            codeparallaxservices@gmail.com
+          </a>
+        </MotionDiv>
+
         {/* Projects header */}
         {!loadingProjects && projects.length > 0 && (
           <div className="flex items-center justify-between mb-6">
@@ -215,6 +235,7 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
+
       </main>
     </div>
   )
