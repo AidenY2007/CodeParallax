@@ -238,7 +238,8 @@ export default function ContactPage() {
                       onChange={setField('message')}
                       placeholder="Describe your vision, goals, budget, and any constraints…"
                       rows={5}
-                      className={`${inputCls(errors.message)} resize-none overflow-hidden`}
+                      className={`${inputCls(errors.message)} resize-none`}
+                      style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     />
                   </Field>
 

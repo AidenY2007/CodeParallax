@@ -42,7 +42,7 @@ function ReplylineVisual() {
       <div className="flex flex-1" style={{ minHeight: 0 }}>
         {/* Left: chat */}
         <div className="flex flex-col flex-1 border-r border-black/[0.07]" style={{ minWidth: 0 }}>
-          <div className="flex-1 px-2.5 pt-2.5 pb-1.5 space-y-1.5 overflow-y-auto">
+          <div className="flex-1 px-2.5 pt-2.5 pb-1.5 space-y-1.5 overflow-hidden">
             {MESSAGES.map((msg, i) => (
               <div key={i} className={`flex ${msg.side === 'right' ? 'justify-end' : 'justify-start'}`}>
                 <div

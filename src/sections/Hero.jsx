@@ -1218,7 +1218,7 @@ export default function Hero() {
 
             <motion.div variants={entrance.item}>
               <p
-                className="text-center text-[1.1rem] font-semibold text-slate-300 leading-relaxed max-w-xl"
+                className="text-center text-[1.1rem] font-semibold text-white leading-relaxed max-w-xl"
                 style={{ textShadow: '0 1px 16px rgba(13,21,48,0.9)' }}
               >
                 Crafting next-generation software tailored to the unique operations of our clients.
